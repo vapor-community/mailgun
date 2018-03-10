@@ -20,7 +20,7 @@ public class MailgunEngine: Mailgun {
     public var apiKey: String
     public var customURL: String
     
-    init(apiKey: String, customURL: String) {
+    public init(apiKey: String, customURL: String) {
         self.apiKey = apiKey
         self.customURL = customURL
     }
