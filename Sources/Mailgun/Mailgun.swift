@@ -8,6 +8,13 @@ public struct MailgunFormData: Content {
     let to: String
     let subject: String
     let text: String
+    
+    public init(from: String, to: String, subject: String, text: String) {
+        self.from = from
+        self.to = to
+        self.subject = subject
+        self.text = text
+    }
 }
 
 public protocol Mailgun: class, Service {
