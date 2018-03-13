@@ -26,6 +26,7 @@ public protocol Mailgun: class, Service {
 public class MailgunEngine: Mailgun {
     public var apiKey: String
     public var customURL: String
+    public var numMailSent: Int = 0
     
     public init(apiKey: String, customURL: String) {
         self.apiKey = apiKey
@@ -48,6 +49,7 @@ public class MailgunEngine: Mailgun {
         return client
             .post(mailgunURL, headers: headers, content: content)
             .map(to: Response.self) { (response) in
+                self.numMailSent += 1
                 return response
             }.catch { (err) in
                 print(err)
