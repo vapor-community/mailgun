@@ -4,7 +4,7 @@ import Foundation
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var customURL: String { get }
-    func sendMail(data content: MailgunEngine.FormData, on req: Request) throws -> Future<Response>
+    func send(data content: MailgunEngine.FormData, on req: Request) throws -> Future<Response>
 }
 
 public struct MailgunEngine: MailgunProvider {
@@ -37,7 +37,7 @@ public struct MailgunEngine: MailgunProvider {
         self.customURL = customURL
     }
     
-    public func sendMail(data content: FormData, on req: Request) throws -> Future<Response> {
+    public func send(data content: FormData, on req: Request) throws -> Future<Response> {
         guard let apiKeyData = "api:key-\(self.apiKey)".data(using: .utf8) else {
             throw MailgunError.encodingProblem
         }
