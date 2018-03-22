@@ -1,6 +1,5 @@
 import Vapor
-import Bits
-
+import Foundation
 
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
@@ -42,7 +41,7 @@ public struct MailgunEngine: MailgunProvider {
         guard let apiKeyData = "api:key-\(self.apiKey)".data(using: .utf8) else {
             throw MailgunError.encodingProblem
         }
-        let authKey = Base64.url.encode(data: apiKeyData)
+        let authKey = apiKeyData.base64EncodedData()
         guard let authKeyEncoded = String.init(data: authKey, encoding: .utf8) else {
             throw MailgunError.encodingProblem
         }
