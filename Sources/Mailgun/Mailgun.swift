@@ -82,7 +82,7 @@ public struct Mailgun: MailgunProvider {
     
     public func send(_ content: Message, on req: Request) throws -> Future<Response> {
         let key = apiKey.contains("key-") ? apiKey : "key-\(apiKey)"
-        guard let apiKeyData = "api:key-\(key)".data(using: .utf8) else {
+        guard let apiKeyData = "api:\(key)".data(using: .utf8) else {
             throw Problem.encodingProblem
         }
         let authKey = apiKeyData.base64EncodedData()
@@ -100,10 +100,11 @@ public struct Mailgun: MailgunProvider {
         let client = try req.make(Client.self)
         
         return client.post(mailgunURL, headers: headers, content: content).map(to: Response.self) { response in
-            switch response.http.status {
-            case .ok:
+            // can't compare status unless https://github.com/vapor/vapor/issues/1566 is fixed
+            switch true {
+            case response.http.status.code == HTTPStatus.ok.code:
                 return response
-            case .unauthorized:
+            case response.http.status.code == HTTPStatus.unauthorized.code:
                 throw Problem.authenticationFailed
             default:
                 throw Problem.unableToSendEmail
