@@ -31,7 +31,6 @@ public struct Mailgun: MailgunProvider {
         public let subject: String
         public let text: String
         public let html: String?
-        public let attachment: [Data]
         
         public init(from: String, to: String, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
             self.from = from
@@ -41,7 +40,6 @@ public struct Mailgun: MailgunProvider {
             self.subject = subject
             self.text = text
             self.html = html
-            self.attachment = attachment
         }
         
         public init(from: String, to: [String], cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
@@ -52,7 +50,6 @@ public struct Mailgun: MailgunProvider {
             self.subject = subject
             self.text = text
             self.html = html
-            self.attachment = attachment
         }
         
         public init(from: String, to: [FullEmail], cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
@@ -63,7 +60,6 @@ public struct Mailgun: MailgunProvider {
             self.subject = subject
             self.text = text
             self.html = html
-            self.attachment = attachment
         }
         
     }
@@ -92,7 +88,7 @@ public struct Mailgun: MailgunProvider {
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        let contentType = content.attachment.isEmpty ? MediaType.urlEncodedForm.description : MediaType.multipart.description
+        let contentType = MediaType.urlEncodedForm.description
         headers.add(name: HTTPHeaderName.contentType, value: contentType)
         
         let mailgunURL = "https://api.mailgun.net/v3/\(domain)/messages"
