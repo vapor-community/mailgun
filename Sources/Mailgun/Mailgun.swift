@@ -99,7 +99,7 @@ public struct Mailgun: MailgunProvider {
         
         let client = try req.make(Client.self)
         
-        return client.post(mailgunURL, headers: headers, content: content).flatMap(to: Response.self) { response in
+        return client.post(mailgunURL, headers: headers, content: content).map(to: Response.self) { response in
             switch response.http.status {
             case .ok:
                 return response
