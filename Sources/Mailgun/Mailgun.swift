@@ -16,6 +16,8 @@ public struct Mailgun: MailgunProvider {
     
     public enum Problem: Error {
         case encodingProblem
+        case authenticationFailed
+        case unableToSendEmail
     }
     
     public struct Message: Content {
@@ -96,7 +98,17 @@ public struct Mailgun: MailgunProvider {
         let mailgunURL = "https://api.mailgun.net/v3/\(domain)/messages"
         
         let client = try req.make(Client.self)
-        return client.post(mailgunURL, headers: headers, content: content)
+        
+        return client.post(mailgunURL, headers: headers, content: content).flatMap(to: Response.self) { response in
+            switch response.http.status {
+            case .ok:
+                return response
+            case .unauthorized:
+                throw Problem.authenticationFailed
+            default:
+                throw Problem.unableToSendEmail
+            }
+        }
     }
     
 }
