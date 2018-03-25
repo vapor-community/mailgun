@@ -1,12 +1,20 @@
 # Vapor Mailgun Service
 
-`MailgunEngine` is a service to be used with Vapor to send emails.
+[![Slack](https://img.shields.io/badge/join-slack-745EAF.svg?style=flat)](http://bit.ly/2B0dEyt)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%2010.13%20|%20Ubuntu%2016.04%20LTS-ff0000.svg?style=flat)](http://cocoapods.org/pods/FASwift)
+[![Swift 4.1](https://img.shields.io/badge/swift-4.1-orange.svg?style=flat)](http://swift.org)
+[![Vapor 3](https://img.shields.io/badge/vapor-3.0-blue.svg?style=flat)](https://vapor.codes)
+
+##
+
+`Mailgun` is a Vapor 3 service for a popular [email sending API](https://www.mailgun.com/)
+
 
 ## Installation
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/twof/VaporMailgunService.git", from: "0.0.1")
+.package(url: "https://github.com/twof/VaporMailgunService.git", from: "0.4.0")
 ```
 
 ## Usage
@@ -14,27 +22,30 @@ Vapor Mailgun Service can be installed with Swift Package Manager
 ### [Sign up and set up a Mailgun account](https://www.mailgun.com/)
 Make sure you get an API key and register a custom domain
 
-### Configure MailgunEngine
+### Configure
+
 In `configure.swift`:
 
 ```swift
-let mailgunEngine = MailgunEngine(apiKey: "<api key>", customURL: "mg.example.com")
-services.register(mailgunEngine, as: Mailgun.self)
+let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com")
+services.register(mailgun, as: Mailgun.self)
 ```
 
-### Make and use MailgunEngine
+### Use
+
 In `routes.swift`:
 
 ```swift
 router.post("mail") { (req) -> Future<Response> in
-    let content: MailgunFormData = MailgunFormData(
+    let message = Mailgun.Message(
         from: "postmaster@example.com",
         to: "example@gmail.com",
         subject: "Newsletter",
-        text: "This is a newsletter"
+        text: "This is a newsletter",
+        html: "<h1>This is a newsletter</h1>"
     )
     
-    let mailgunClient = try req.make(Mailgun.self)
-    return try mailgunClient.sendMail(data: content, on: req)
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.send(message, on: req)
 }
 ```
