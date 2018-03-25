@@ -14,7 +14,7 @@ public protocol MailgunProvider: Service {
 
 public struct Mailgun: MailgunProvider {
     
-    public enum Problem: Error {
+    public enum MailgunError: Error {
         case encodingProblem
         case authenticationFailed
         case unableToSendEmail
@@ -79,11 +79,11 @@ public struct Mailgun: MailgunProvider {
     public func send(_ content: Message, on req: Request) throws -> Future<Response> {
         let key = apiKey.contains("key-") ? apiKey : "key-\(apiKey)"
         guard let apiKeyData = "api:\(key)".data(using: .utf8) else {
-            throw Problem.encodingProblem
+            throw MailgunError.encodingProblem
         }
         let authKey = apiKeyData.base64EncodedData()
         guard let authKeyEncoded = String.init(data: authKey, encoding: .utf8) else {
-            throw Problem.encodingProblem
+            throw MailgunError.encodingProblem
         }
         
         var headers = HTTPHeaders([])
@@ -101,9 +101,9 @@ public struct Mailgun: MailgunProvider {
             case response.http.status.code == HTTPStatus.ok.code:
                 return response
             case response.http.status.code == HTTPStatus.unauthorized.code:
-                throw Problem.authenticationFailed
+                throw MailgunError.authenticationFailed
             default:
-                throw Problem.unableToSendEmail
+                throw MailgunError.unableToSendEmail
             }
         }
     }
