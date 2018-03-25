@@ -32,7 +32,7 @@ public struct Mailgun: MailgunProvider {
         public let text: String
         public let html: String?
         
-        public init(from: String, to: String, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
+        public init(from: String, to: String, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil) {
             self.from = from
             self.to = to
             self.cc = cc
@@ -42,7 +42,7 @@ public struct Mailgun: MailgunProvider {
             self.html = html
         }
         
-        public init(from: String, to: [String], cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
+        public init(from: String, to: [String], cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil) {
             self.from = from
             self.to = to.joined(separator: ",")
             self.cc = cc?.joined(separator: ",")
@@ -52,7 +52,7 @@ public struct Mailgun: MailgunProvider {
             self.html = html
         }
         
-        public init(from: String, to: [FullEmail], cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachment: [Data] = []) {
+        public init(from: String, to: [FullEmail], cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil) {
             self.from = from
             self.to = to.stringArray.joined(separator: ",")
             self.cc = cc?.stringArray.joined(separator: ",")
