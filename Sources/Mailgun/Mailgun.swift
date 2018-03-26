@@ -23,8 +23,6 @@ public struct Mailgun: MailgunProvider {
     public struct Message: Content {
         public static var defaultMediaType: MediaType = MediaType.urlEncodedForm
         
-        static var defaultMediaType: MediaType = MediaType.urlEncodedForm
-        
         public typealias FullEmail = (email: String, name: String?)
         
         public let from: String
