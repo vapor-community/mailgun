@@ -8,6 +8,7 @@ public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var domain: String { get }
     func send(_ content: Mailgun.Message, on req: Request) throws -> Future<Response>
+    func setupForwarding(setup: RouteSetup, on request: Request) throws -> Future<Response>
 }
 
 // MARK: - Engine
@@ -33,14 +34,7 @@ public struct Mailgun: MailgunProvider {
     // MARK: Send message
     
     public func send(_ content: Message, on req: Request) throws -> Future<Response> {
-        let key = apiKey.contains("key-") ? apiKey : "key-\(apiKey)"
-        guard let apiKeyData = "api:\(key)".data(using: .utf8) else {
-            throw MailgunError.encodingProblem
-        }
-        let authKey = apiKeyData.base64EncodedData()
-        guard let authKeyEncoded = String.init(data: authKey, encoding: .utf8) else {
-            throw MailgunError.encodingProblem
-        }
+        let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
@@ -64,6 +58,50 @@ public struct Mailgun: MailgunProvider {
         }
     }
     
+    public func setupForwarding(setup: RouteSetup, on req: Request) throws -> Future<Response> {
+        let authKeyEncoded = try encode(apiKey: self.apiKey)
+        
+        var headers = HTTPHeaders([])
+        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
+        let contentType = MediaType.urlEncodedForm.description
+        headers.add(name: HTTPHeaderName.contentType, value: contentType)
+        
+        let mailgunURL = "https://api.mailgun.net/v3/routes"
+        
+        let client = try req.make(Client.self)
+        
+        return client
+            .post(mailgunURL, headers: headers, content: setup)
+            .map(to: Response.self) { (response) in
+                // can't compare status unless https://github.com/vapor/vapor/issues/1566 is fixed
+                switch true {
+                case response.http.status.code == HTTPStatus.ok.code:
+                    return response
+                case response.http.status.code == HTTPStatus.unauthorized.code:
+                    throw MailgunError.authenticationFailed
+                default:
+                    throw MailgunError.unableToSendEmail
+                }
+            }
+    }
+    
+}
+
+// MARK: Private
+
+fileprivate extension Mailgun {
+    func encode(apiKey: String) throws -> String {
+        let key = apiKey.contains("key-") ? apiKey : "key-\(apiKey)"
+        guard let apiKeyData = "api:\(key)".data(using: .utf8) else {
+            throw MailgunError.encodingProblem
+        }
+        let authKey = apiKeyData.base64EncodedData()
+        guard let authKeyEncoded = String.init(data: authKey, encoding: .utf8) else {
+            throw MailgunError.encodingProblem
+        }
+        
+        return authKeyEncoded
+    }
 }
 
 // MARK: - Conversions
