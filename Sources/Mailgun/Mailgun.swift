@@ -8,7 +8,7 @@ public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var domain: String { get }
     func send(_ content: Mailgun.Message, on req: Request) throws -> Future<Response>
-    func setupForwarding(setup: RouteSetup, on request: Request) throws -> Future<Response>
+    func setupForwarding(setup: RouteSetup, with container: Container) throws -> Future<Response>
 }
 
 // MARK: - Engine
@@ -46,7 +46,6 @@ public struct Mailgun: MailgunProvider {
         let client = try req.make(Client.self)
         
         return client.post(mailgunURL, headers: headers, content: content).map(to: Response.self) { response in
-            // can't compare status unless https://github.com/vapor/vapor/issues/1566 is fixed
             switch true {
             case response.http.status.code == HTTPStatus.ok.code:
                 return response
@@ -58,7 +57,7 @@ public struct Mailgun: MailgunProvider {
         }
     }
     
-    public func setupForwarding(setup: RouteSetup, on req: Request) throws -> Future<Response> {
+    public func setupForwarding(setup: RouteSetup, with container: Container) throws -> Future<Response> {
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
@@ -68,12 +67,11 @@ public struct Mailgun: MailgunProvider {
         
         let mailgunURL = "https://api.mailgun.net/v3/routes"
         
-        let client = try req.make(Client.self)
+        let client = try container.make(Client.self)
         
         return client
             .post(mailgunURL, headers: headers, content: setup)
             .map(to: Response.self) { (response) in
-                // can't compare status unless https://github.com/vapor/vapor/issues/1566 is fixed
                 switch true {
                 case response.http.status.code == HTTPStatus.ok.code:
                     return response
