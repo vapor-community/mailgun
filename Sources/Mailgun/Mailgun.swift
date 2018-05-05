@@ -45,7 +45,9 @@ public struct Mailgun: MailgunProvider {
         
         let client = try req.make(Client.self)
         
-        return client.post(mailgunURL, headers: headers, content: content).map(to: Response.self) { response in
+        return client.post(mailgunURL, headers: headers) { req in
+            try req.content.encode(content)
+        }.map(to: Response.self) { response in
             switch true {
             case response.http.status.code == HTTPStatus.ok.code:
                 return response
@@ -70,8 +72,9 @@ public struct Mailgun: MailgunProvider {
         let client = try container.make(Client.self)
         
         return client
-            .post(mailgunURL, headers: headers, content: setup)
-            .map(to: Response.self) { (response) in
+            .post(mailgunURL, headers: headers) { req in
+                try req.content.encode(setup)
+            }.map(to: Response.self) { (response) in
                 switch true {
                 case response.http.status.code == HTTPStatus.ok.code:
                     return response
