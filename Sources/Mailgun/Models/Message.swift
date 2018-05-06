@@ -2,7 +2,7 @@ import Vapor
 
 extension Mailgun {
     public struct Message: Content {
-        public static var defaultMediaType: MediaType = MediaType.urlEncodedForm
+        public static var defaultContentType: MediaType = MediaType.urlEncodedForm
         
         public typealias FullEmail = (email: String, name: String?)
         
