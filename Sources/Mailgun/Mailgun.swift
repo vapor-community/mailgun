@@ -44,7 +44,7 @@ public struct Mailgun: MailgunProvider {
         let client = try req.make(Client.self)
         
         return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(content, as: MediaType.urlEncodedForm)
+            try req.content.encode(content)
         }.map(to: Response.self) { response in
             switch true {
             case response.http.status.code == HTTPStatus.ok.code:
@@ -62,15 +62,12 @@ public struct Mailgun: MailgunProvider {
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        let contentType = MediaType.urlEncodedForm.description
-        headers.add(name: HTTPHeaderName.contentType, value: contentType)
         
         let mailgunURL = "https://api.mailgun.net/v3/routes"
         
         let client = try container.make(Client.self)
         
-        return client
-            .post(mailgunURL, headers: headers) { req in
+        return client.post(mailgunURL, headers: headers) { req in
                 try req.content.encode(setup)
             }.map(to: Response.self) { (response) in
                 switch true {
