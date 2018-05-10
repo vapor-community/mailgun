@@ -7,7 +7,7 @@ import Foundation
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var domain: String { get }
-    func send(_ content: Mailgun.Message, on req: Request) throws -> Future<Response>
+    func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
     func setupForwarding(setup: RouteSetup, with container: Container) throws -> Future<Response>
 }
 
@@ -33,7 +33,7 @@ public struct Mailgun: MailgunProvider {
     
     // MARK: Send message
     
-    public func send(_ content: Message, on req: Request) throws -> Future<Response> {
+    public func send(_ content: Message, on container: Container) throws -> Future<Response> {
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
@@ -41,7 +41,7 @@ public struct Mailgun: MailgunProvider {
         
         let mailgunURL = "https://api.mailgun.net/v3/\(domain)/messages"
         
-        let client = try req.make(Client.self)
+        let client = try container.make(Client.self)
         
         return client.post(mailgunURL, headers: headers) { req in
             try req.content.encode(content)
