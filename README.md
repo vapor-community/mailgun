@@ -19,7 +19,7 @@ Vapor Mailgun Service can be installed with Swift Package Manager
 
 ## Usage
 
-### [Sign up and set up a Mailgun account](https://www.mailgun.com/)
+### Sign up and set up a Mailgun account [here](https://www.mailgun.com/)
 Make sure you get an API key and register a custom domain
 
 ### Configure
