@@ -87,8 +87,7 @@ public struct Mailgun: MailgunProvider {
 
 fileprivate extension Mailgun {
     func encode(apiKey: String) throws -> String {
-        let key = apiKey.contains("key-") ? apiKey : "key-\(apiKey)"
-        guard let apiKeyData = "api:\(key)".data(using: .utf8) else {
+        guard let apiKeyData = "api:\(apiKey)".data(using: .utf8) else {
             throw MailgunError.encodingProblem
         }
         let authKey = apiKeyData.base64EncodedData()
