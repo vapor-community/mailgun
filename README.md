@@ -51,3 +51,30 @@ router.post("mail") { (req) -> Future<Response> in
     return try mailgun.send(message, on: req)
 }
 ```
+
+#### Setup routes
+
+```swift
+public func boot(_ app: Application) throws {
+    // sets up a catch_all forward for the route listed
+    let routeSetup = RouteSetup(forwardURL: "http://example.com/mailgun/all", description: "A route for all emails")
+    let mailgunClient = try app.make(Mailgun.self)
+    try mailgunClient.setupForwarding(setup: routeSetup, with: app).map { (resp) in
+        print(resp)
+    }
+}
+```
+
+#### Handle routes
+
+```swift
+mailgunGroup.post("all") { (req) -> Future<String> in
+    do {
+        return try req.content.decode(IncomingMailgun.self).map { (incomingMail) in
+            return "Hello"
+        }
+    } catch {
+        throw Abort(HTTPStatus.internalServerError, reason: "Could not decode incoming Mailgun")
+    }
+}
+```
