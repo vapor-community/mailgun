@@ -31,6 +31,8 @@ let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com")
 services.register(mailgun, as: Mailgun.self)
 ```
 
+Note: If your private api key begins with `key-`, be sure to include it
+
 ### Use
 
 In `routes.swift`:
