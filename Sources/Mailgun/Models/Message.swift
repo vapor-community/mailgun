@@ -2,7 +2,7 @@ import Vapor
 
 extension Mailgun {
     public struct Message: Content {
-        public static var defaultContentType: MediaType = MediaType.urlEncodedForm
+        public static var defaultContentType: MediaType = MediaType.formData
         
         public typealias FullEmail = (email: String, name: String?)
         
@@ -13,8 +13,9 @@ extension Mailgun {
         public let subject: String
         public let text: String
         public let html: String?
+        public let attachment: [File]?
         
-        public init(from: String, to: String, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil) {
+        public init(from: String, to: String, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil) {
             self.from = from
             self.to = to
             self.cc = cc
@@ -22,9 +23,10 @@ extension Mailgun {
             self.subject = subject
             self.text = text
             self.html = html
+            self.attachment = attachments
         }
         
-        public init(from: String, to: [String], cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil) {
+        public init(from: String, to: [String], cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil) {
             self.from = from
             self.to = to.joined(separator: ",")
             self.cc = cc?.joined(separator: ",")
@@ -32,9 +34,10 @@ extension Mailgun {
             self.subject = subject
             self.text = text
             self.html = html
+            self.attachment = attachments
         }
         
-        public init(from: String, to: [FullEmail], cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil) {
+        public init(from: String, to: [FullEmail], cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil) {
             self.from = from
             self.to = to.stringArray.joined(separator: ",")
             self.cc = cc?.stringArray.joined(separator: ",")
@@ -42,6 +45,7 @@ extension Mailgun {
             self.subject = subject
             self.text = text
             self.html = html
+            self.attachment = attachments
         }
     }
 }

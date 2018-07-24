@@ -37,6 +37,8 @@ Note: If your private api key begins with `key-`, be sure to include it
 
 In `routes.swift`:
 
+#### Without attachments
+
 ```swift
 router.post("mail") { (req) -> Future<Response> in
     let message = Mailgun.Message(
@@ -45,6 +47,29 @@ router.post("mail") { (req) -> Future<Response> in
         subject: "Newsletter",
         text: "This is a newsletter",
         html: "<h1>This is a newsletter</h1>"
+    )
+    
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.send(message, on: req)
+}
+```
+
+#### With attachments
+
+```swift
+router.post("mail") { (req) -> Future<Response> in
+    let fm = FileManager.default
+    guard let attachmentData = fm.contents(atPath: "/tmp/test.pdf") else {
+        throw Abort(.internalServerError)
+    }
+    let attachment = File(data: attachmentData, filename: "test.pdf")
+    let message = Mailgun.Message(
+        from: "postmaster@example.com",
+        to: "example@gmail.com",
+        subject: "Newsletter",
+        text: "This is a newsletter",
+        html: "<h1>This is a newsletter</h1>",
+        attachments: [attachment]
     )
     
     let mailgun = try req.make(Mailgun.self)
