@@ -55,8 +55,7 @@ public struct Mailgun: MailgunProvider {
             case .unknownError:
                 return "Generic error"
             }
-        }
-        
+        } 
     }
     
     /// Error response object
@@ -129,12 +128,11 @@ public struct Mailgun: MailgunProvider {
         let client = try container.make(Client.self)
         
         return client.post(mailgunURL, headers: headers) { req in
-                try req.content.encode(setup)
-            }.map(to: Response.self) { (response) in
-                try self.process(response)
-            }
+            try req.content.encode(setup)
+        }.map(to: Response.self) { (response) in
+            try self.process(response)
+        }
     }
-    
 }
 
 // MARK: Private
@@ -174,12 +172,11 @@ fileprivate extension Mailgun {
 extension Array where Element == Mailgun.Message.FullEmail {
     
     var stringArray: [String] {
-        return map({ entry -> String in
+        return map { entry -> String in
             guard let name = entry.name else {
                 return entry.email
             }
             return "\"\(name) <\(entry.email)>\""
-        })
+        }
     }
-    
 }
