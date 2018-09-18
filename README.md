@@ -14,7 +14,7 @@
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/twof/VaporMailgunService.git", from: "1.1.0")
+.package(url: "https://github.com/twof/VaporMailgunService.git", from: "1.5.0")
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com")
 services.register(mailgun, as: Mailgun.self)
 ```
 
-Note: If your private api key begins with `key-`, be sure to include it
+> Note: If your private api key begins with `key-`, be sure to include it
 
 ### Use
 
@@ -84,7 +84,7 @@ public func boot(_ app: Application) throws {
     // sets up a catch_all forward for the route listed
     let routeSetup = RouteSetup(forwardURL: "http://example.com/mailgun/all", description: "A route for all emails")
     let mailgunClient = try app.make(Mailgun.self)
-    try mailgunClient.setupForwarding(setup: routeSetup, with: app).map { (resp) in
+    try mailgunClient.setup(forwarding: routeSetup, with: app).map { (resp) in
         print(resp)
     }
 }
@@ -99,7 +99,7 @@ mailgunGroup.post("all") { (req) -> Future<String> in
             return "Hello"
         }
     } catch {
-        throw Abort(HTTPStatus.internalServerError, reason: "Could not decode incoming Mailgun")
+        throw Abort(HTTPStatus.internalServerError, reason: "Could not decode incoming message")
     }
 }
 ```
