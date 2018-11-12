@@ -48,7 +48,7 @@ router.post("mail") { (req) -> Future<Response> in
         text: "This is a newsletter",
         html: "<h1>This is a newsletter</h1>"
     )
-    
+
     let mailgun = try req.make(Mailgun.self)
     return try mailgun.send(message, on: req)
 }
@@ -71,7 +71,42 @@ router.post("mail") { (req) -> Future<Response> in
         html: "<h1>This is a newsletter</h1>",
         attachments: [attachment]
     )
-    
+
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.send(message, on: req)
+}
+```
+
+#### Setup content through Leaf
+
+Using Vapor Leaf, you can easily setup your HTML Content.
+
+First setup a leaf file in `Resources/Views/Emails/my-email.leaf`
+
+```html
+<html>
+    <body>
+        <p>Hi #(name)</p>
+    </body>
+</html>
+```
+
+With this, you can change the `#(name)` with a variable from your Swift code, when sending the mail
+
+```swift
+router.post("mail") { (req) -> Future<Response> in
+    let content = try req.view().render("Emails/my-email", [
+        "name": "Bob"
+    ])
+
+    let message = Mailgun.Message(
+        from: "postmaster@example.com",
+        to: "example@gmail.com",
+        subject: "Newsletter",
+        text: "",
+        html: content
+    )
+
     let mailgun = try req.make(Mailgun.self)
     return try mailgun.send(message, on: req)
 }
