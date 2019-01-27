@@ -12,7 +12,7 @@ let package = Package(
             targets: ["Mailgun"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", .exact("3.1.0")),
+        .package(url: "https://github.com/vapor/vapor.git"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
