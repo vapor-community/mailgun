@@ -27,7 +27,7 @@ Make sure you get an API key and register a custom domain
 In `configure.swift`:
 
 ```swift
-let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com")
+let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com", region: .eu)
 services.register(mailgun, as: Mailgun.self)
 ```
 
