@@ -7,6 +7,7 @@ import Foundation
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var domain: String { get }
+    var region: Mailgun.Region { get }
     func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
     func setup(forwarding: RouteSetup, with container: Container) throws -> Future<Response>
 }
@@ -14,6 +15,12 @@ public protocol MailgunProvider: Service {
 // MARK: - Engine
 
 public struct Mailgun: MailgunProvider {
+    
+    /// Describes a region: US or EU
+    public enum Region {
+        case us
+        case eu
+    }
     
     public enum Error: Debuggable {
         
@@ -72,6 +79,9 @@ public struct Mailgun: MailgunProvider {
     /// Domain
     public let domain: String
     
+    /// Region
+    public let region: Mailgun.Region
+    
     // MARK: Initialization
     
     
@@ -80,9 +90,10 @@ public struct Mailgun: MailgunProvider {
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
     ///   - domain: API domain
-    public init(apiKey: String, domain: String) {
+    public init(apiKey: String, domain: String, region: Mailgun.Region) {
         self.apiKey = apiKey
         self.domain = domain
+        self.region = region
     }
     
     // MARK: Send message
@@ -99,7 +110,7 @@ public struct Mailgun: MailgunProvider {
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
         
-        let mailgunURL = "https://api.mailgun.net/v3/\(domain)/messages"
+        let mailgunURL = "\(baseApiUrl)/\(domain)/messages"
         
         let client = try container.make(Client.self)
         
@@ -123,7 +134,7 @@ public struct Mailgun: MailgunProvider {
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
         
-        let mailgunURL = "https://api.mailgun.net/v3/routes"
+        let mailgunURL = "\(baseApiUrl)/v3/routes"
         
         let client = try container.make(Client.self)
         
@@ -138,6 +149,9 @@ public struct Mailgun: MailgunProvider {
 // MARK: Private
 
 fileprivate extension Mailgun {
+    private var baseApiUrl: String {
+        return region == .eu ? "https://api.eu.mailgun.net/v3" : "https://api.mailgun.net/v3"
+    }
     
     func encode(apiKey: String) throws -> String {
         guard let apiKeyData = "api:\(apiKey)".data(using: .utf8) else {
