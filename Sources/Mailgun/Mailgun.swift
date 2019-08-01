@@ -135,7 +135,7 @@ public struct Mailgun: MailgunProvider {
     /// Create template
     ///
     /// - Parameters:
-    ///   - setup: RouteSetup
+    ///   - template: Template
     ///   - container: Container
     /// - Returns: Future<Response>
     public func createTemplate(_ template: Template, on container: Container) throws -> Future<Response> {
