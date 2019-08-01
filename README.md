@@ -163,6 +163,6 @@ router.post("template") { (req) -> Future<Response> in
     let template = Mailgun.Template(name: "my-template", description: "api created :)", template: "<h1>Hello {{ name }}</h1>")
     
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.createTemplate(template, on: app)
+    return try mailgun.createTemplate(template, on: req)
 }
 ```
