@@ -18,7 +18,16 @@ extension Mailgun {
         public let inline: [File]?
         
         private enum CodingKeys : String, CodingKey {
-            case from, to, replyTo = "h:Reply-To", cc, bcc, subject, text, html, attachment, inline
+            case from
+            case to
+            case replyTo = "h:Reply-To"
+            case cc
+            case bcc
+            case subject
+            case text
+            case html
+            case attachment
+            case inline
         }
         
         public init(from: String, to: String, replyTo: String? = nil, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil) {

@@ -20,7 +20,18 @@ extension Mailgun {
         public let inline: [File]?
         
         private enum CodingKeys : String, CodingKey {
-            case from, to, replyTo = "h:Reply-To", cc, bcc, subject, template, templateData = "h:X-Mailgun-Variables", templateVersion = "t:version", templateText = "t:text", attachment, inline
+            case from
+            case to
+            case replyTo = "h:Reply-To"
+            case cc
+            case bcc
+            case subject
+            case template
+            case attachment
+            case inline
+            case templateData = "h:X-Mailgun-Variables"
+            case templateVersion = "t:version"
+            case templateText = "t:text"
         }
         
         public func encode(to encoder: Encoder) throws {
@@ -31,11 +42,12 @@ extension Mailgun {
             try container.encode(bcc, forKey: .bcc)            
             try container.encode(subject, forKey: .subject)
             try container.encode(template, forKey: .template)
-            let jsonData = try! JSONEncoder().encode(templateData)
-            let jsonString = String(data: jsonData, encoding: .utf8)!
+            guard let jsonData = try? JSONEncoder().encode(templateData), let jsonString = String(data: jsonData, encoding: .utf8) else {
+                throw Error.encodingProblem
+            }
             try container.encode(jsonString, forKey: .templateData)
             try container.encode(templateVersion, forKey: .templateVersion)
-            let text = templateText != nil && templateText! ? "yes" : nil // need to send yes as string
+            let text = templateText == true ? "yes" : nil // need to send yes as string
             try container.encode(text, forKey: .templateText)
             try container.encode(attachment, forKey: .attachment)
             try container.encode(inline, forKey: .inline)
