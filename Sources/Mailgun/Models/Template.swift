@@ -17,7 +17,7 @@ extension Mailgun {
             case template
             case tag
             case engine
-            case versionComment="comment"
+            case versionComment = "comment"
         }
         
         public init(name: String, description: String, template: String? = nil, tag: String? = nil, engine: String? = nil, versionComment: String? = nil) {
