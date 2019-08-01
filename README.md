@@ -54,6 +54,23 @@ router.post("mail") { (req) -> Future<Response> in
 }
 ```
 
+#### With a template
+
+```swift
+router.post("mail") { (req) -> Future<Response> in
+    let message = Mailgun.TemplateMessage(
+        from: "postmaster@example.com",
+        to: "example@gmail.com",
+        subject: "Newsletter",
+        template: "my-template",
+        templateData: ["foo": "bar"]
+    )
+
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.send(message, on: req)
+}
+```
+
 #### With attachments
 
 ```swift
