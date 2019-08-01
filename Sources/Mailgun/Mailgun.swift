@@ -9,6 +9,7 @@ public protocol MailgunProvider: Service {
     var domain: String { get }
     var region: Mailgun.Region { get }
     func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.TemplateMessage, on container: Container) throws -> Future<Response>
     func setup(forwarding: RouteSetup, with container: Container) throws -> Future<Response>
 }
 
@@ -105,20 +106,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: Message, on container: Container) throws -> Future<Response> {
-        let authKeyEncoded = try encode(apiKey: self.apiKey)
-        
-        var headers = HTTPHeaders([])
-        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        
-        let mailgunURL = "\(baseApiUrl)/\(domain)/messages"
-        
-        let client = try container.make(Client.self)
-        
-        return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(content)
-        }.map(to: Response.self) { response in
-            try self.process(response)
-        }
+        return try sendData(content, on: container)
     }
 
     // MARK: Send message
@@ -130,20 +118,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: TemplateMessage, on container: Container) throws -> Future<Response> {
-        let authKeyEncoded = try encode(apiKey: self.apiKey)
-        
-        var headers = HTTPHeaders([])
-        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        
-        let mailgunURL = "\(baseApiUrl)/\(domain)/messages"
-        
-        let client = try container.make(Client.self)
-        
-        return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(content)
-        }.map(to: Response.self) { response in
-            try self.process(response)
-        }
+        return try sendData(content, on: container)
     }
     
     /// Setup forwarding
@@ -200,6 +175,23 @@ fileprivate extension Mailgun {
                 throw Error.unableToSendEmail(err)
             }
             throw Error.unknownError(response)
+        }
+    }
+
+    private func sendData<Message: Content>(_ content: Message, on container: Container) throws -> Future<Response> {
+        let authKeyEncoded = try encode(apiKey: self.apiKey)
+        
+        var headers = HTTPHeaders([])
+        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
+        
+        let mailgunURL = "\(baseApiUrl)/\(domain)/messages"
+        
+        let client = try container.make(Client.self)
+        
+        return client.post(mailgunURL, headers: headers) { req in
+            try req.content.encode(content)
+        }.map(to: Response.self) { response in
+            try self.process(response)
         }
     }
     
