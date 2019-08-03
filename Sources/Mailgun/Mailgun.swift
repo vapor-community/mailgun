@@ -107,7 +107,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: Message, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, method: "messages", on: container)
+        return try postRequest(content, endpoint: "messages", on: container)
     }
 
     // MARK: Send message
@@ -119,7 +119,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: TemplateMessage, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, method: "messages", on: container)
+        return try postRequest(content, endpoint: "messages", on: container)
     }
     
     /// Setup forwarding
@@ -129,7 +129,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func setup(forwarding setup: RouteSetup, with container: Container) throws -> Future<Response> {
-        return try postRequest(setup, method: "v3/routes", on: container)
+        return try postRequest(setup, endpoint: "v3/routes", on: container)
     }
 
     /// Create template
@@ -139,7 +139,7 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func createTemplate(_ template: Template, on container: Container) throws -> Future<Response> {
-        return try postRequest(template, method: "templates", on: container)
+        return try postRequest(template, endpoint: "templates", on: container)
     }
 }
 
@@ -176,13 +176,13 @@ fileprivate extension Mailgun {
         }
     }
 
-    private func postRequest<Message: Content>(_ content: Message, method: String, on container: Container) throws -> Future<Response> {
+    private func postRequest<Message: Content>(_ content: Message, endpoint: String, on container: Container) throws -> Future<Response> {
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
         
-        let mailgunURL = "\(baseApiUrl)/\(domain)/\(method)"
+        let mailgunURL = "\(baseApiUrl)/\(domain)/\(endpoint)"
         
         let client = try container.make(Client.self)
         

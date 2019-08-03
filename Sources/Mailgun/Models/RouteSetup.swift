@@ -2,7 +2,7 @@ import Vapor
 import Foundation
 
 public struct RouteSetup: Content {
-    public static var defaultContentType: MediaType = MediaType.urlEncodedForm
+    public static var defaultContentType: MediaType = .urlEncodedForm
     
     public let priority: Int
     public let description: String

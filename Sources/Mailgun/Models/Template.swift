@@ -1,12 +1,13 @@
 import Vapor
 
 extension Mailgun {
+    /// Template, see https://documentation.mailgun.com/en/latest/api-templates.html#templates
     public struct Template: Content {
-        public static var defaultContentType: MediaType = MediaType.formData
+        public static var defaultContentType: MediaType = .formData
 
         public let name: String
         public let description: String
-        public let template	: String?
+        public let template: String?
         public let tag: String?
         public let engine: String?
         public let versionComment: String?
