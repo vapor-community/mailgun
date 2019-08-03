@@ -34,7 +34,10 @@ public struct Mailgun: MailgunProvider {
         
         /// Failed to send email (with error message)
         case unableToSendEmail(ErrorResponse)
-        
+
+        /// Failed to create template (with error message)
+        case unableToCreateTemplate(ErrorResponse)
+
         /// Generic error
         case unknownError(Response)
         
@@ -47,6 +50,8 @@ public struct Mailgun: MailgunProvider {
                 return "mailgun.auth_failed"
             case .unableToSendEmail:
                 return "mailgun.send_email_failed"
+            case .unableToCreateTemplate:
+                return "mailgun.create_template_failed"
             case .unknownError:
                 return "mailgun.unknown_error"
             }
@@ -61,6 +66,8 @@ public struct Mailgun: MailgunProvider {
                 return "Failed authentication"
             case .unableToSendEmail(let err):
                 return "Failed to send email (\(err.message))"
+            case .unableToCreateTemplate(let err):
+                return "Failed to create template (\(err.message))"
             case .unknownError:
                 return "Generic error"
             }
@@ -170,7 +177,11 @@ fileprivate extension Mailgun {
             throw Error.authenticationFailed
         default:
             if let data = response.http.body.data, let err = (try? JSONDecoder().decode(ErrorResponse.self, from: data)) {
-                throw Error.unableToSendEmail(err)
+                if (err.message.hasPrefix("template")) {
+                    throw Error.unableToCreateTemplate(err)
+                } else {
+                    throw Error.unableToSendEmail(err)
+                }
             }
             throw Error.unknownError(response)
         }
