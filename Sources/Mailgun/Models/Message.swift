@@ -2,7 +2,7 @@ import Vapor
 
 extension Mailgun {
     public struct Message: Content {
-        public static var defaultContentType: MediaType = MediaType.formData
+        public static var defaultContentType: MediaType = .formData
         
         public typealias FullEmail = (email: String, name: String?)
         
@@ -17,8 +17,17 @@ extension Mailgun {
         public let attachment: [File]?
         public let inline: [File]?
         
-        private enum CodingKeys : String, CodingKey {
-            case from, to, replyTo = "h:Reply-To", cc, bcc, subject, text, html, attachment, inline
+        private enum CodingKeys: String, CodingKey {
+            case from
+            case to
+            case replyTo = "h:Reply-To"
+            case cc
+            case bcc
+            case subject
+            case text
+            case html
+            case attachment
+            case inline
         }
         
         public init(from: String, to: String, replyTo: String? = nil, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil) {

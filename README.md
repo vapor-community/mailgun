@@ -77,6 +77,23 @@ router.post("mail") { (req) -> Future<Response> in
 }
 ```
 
+#### With template (attachments can be used in same way)
+
+```swift
+router.post("mail") { (req) -> Future<Response> in
+    let message = Mailgun.TemplateMessage(
+        from: "postmaster@example.com",
+        to: "example@gmail.com",
+        subject: "Newsletter",
+        template: "my-template",
+        templateData: ["foo": "bar"]
+    )
+
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.send(message, on: req)
+}
+```
+
 #### Setup content through Leaf
 
 Using Vapor Leaf, you can easily setup your HTML Content.
@@ -136,5 +153,16 @@ mailgunGroup.post("all") { (req) -> Future<String> in
     } catch {
         throw Abort(HTTPStatus.internalServerError, reason: "Could not decode incoming message")
     }
+}
+```
+
+#### Creating templates
+
+```swift
+router.post("template") { (req) -> Future<Response> in
+    let template = Mailgun.Template(name: "my-template", description: "api created :)", template: "<h1>Hello {{ name }}</h1>")
+    
+    let mailgun = try req.make(Mailgun.self)
+    return try mailgun.createTemplate(template, on: req)
 }
 ```

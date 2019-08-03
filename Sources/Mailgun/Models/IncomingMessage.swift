@@ -1,7 +1,7 @@
 import Vapor
 
 public struct IncomingMailgun: Content {
-    public static var defaultContentType: MediaType = MediaType.formData
+    public static var defaultContentType: MediaType = .formData
     
     public let recipient: String
     public let sender: String

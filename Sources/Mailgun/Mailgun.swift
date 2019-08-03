@@ -9,7 +9,9 @@ public protocol MailgunProvider: Service {
     var domain: String { get }
     var region: Mailgun.Region { get }
     func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.TemplateMessage, on container: Container) throws -> Future<Response>
     func setup(forwarding: RouteSetup, with container: Container) throws -> Future<Response>
+    func createTemplate(_ template: Mailgun.Template, on container: Container) throws -> Future<Response>
 }
 
 // MARK: - Engine
@@ -32,7 +34,10 @@ public struct Mailgun: MailgunProvider {
         
         /// Failed to send email (with error message)
         case unableToSendEmail(ErrorResponse)
-        
+
+        /// Failed to create template (with error message)
+        case unableToCreateTemplate(ErrorResponse)
+
         /// Generic error
         case unknownError(Response)
         
@@ -45,6 +50,8 @@ public struct Mailgun: MailgunProvider {
                 return "mailgun.auth_failed"
             case .unableToSendEmail:
                 return "mailgun.send_email_failed"
+            case .unableToCreateTemplate:
+                return "mailgun.create_template_failed"
             case .unknownError:
                 return "mailgun.unknown_error"
             }
@@ -59,6 +66,8 @@ public struct Mailgun: MailgunProvider {
                 return "Failed authentication"
             case .unableToSendEmail(let err):
                 return "Failed to send email (\(err.message))"
+            case .unableToCreateTemplate(let err):
+                return "Failed to create template (\(err.message))"
             case .unknownError:
                 return "Generic error"
             }
@@ -105,22 +114,20 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: Message, on container: Container) throws -> Future<Response> {
-        let authKeyEncoded = try encode(apiKey: self.apiKey)
-        
-        var headers = HTTPHeaders([])
-        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        
-        let mailgunURL = "\(baseApiUrl)/\(domain)/messages"
-        
-        let client = try container.make(Client.self)
-        
-        return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(content)
-        }.map(to: Response.self) { response in
-            try self.process(response)
-        }
+        return try postRequest(content, endpoint: "messages", on: container)
     }
+
+    // MARK: Send message
     
+    /// Send message
+    ///
+    /// - Parameters:
+    ///   - content: TemplateMessage
+    ///   - container: Container
+    /// - Returns: Future<Response>
+    public func send(_ content: TemplateMessage, on container: Container) throws -> Future<Response> {
+        return try postRequest(content, endpoint: "messages", on: container)
+    }
     
     /// Setup forwarding
     ///
@@ -129,20 +136,17 @@ public struct Mailgun: MailgunProvider {
     ///   - container: Container
     /// - Returns: Future<Response>
     public func setup(forwarding setup: RouteSetup, with container: Container) throws -> Future<Response> {
-        let authKeyEncoded = try encode(apiKey: self.apiKey)
-        
-        var headers = HTTPHeaders([])
-        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        
-        let mailgunURL = "\(baseApiUrl)/v3/routes"
-        
-        let client = try container.make(Client.self)
-        
-        return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(setup)
-        }.map(to: Response.self) { (response) in
-            try self.process(response)
-        }
+        return try postRequest(setup, endpoint: "v3/routes", on: container)
+    }
+
+    /// Create template
+    ///
+    /// - Parameters:
+    ///   - template: Template
+    ///   - container: Container
+    /// - Returns: Future<Response>
+    public func createTemplate(_ template: Template, on container: Container) throws -> Future<Response> {
+        return try postRequest(template, endpoint: "templates", on: container)
     }
 }
 
@@ -173,9 +177,30 @@ fileprivate extension Mailgun {
             throw Error.authenticationFailed
         default:
             if let data = response.http.body.data, let err = (try? JSONDecoder().decode(ErrorResponse.self, from: data)) {
-                throw Error.unableToSendEmail(err)
+                if (err.message.hasPrefix("template")) {
+                    throw Error.unableToCreateTemplate(err)
+                } else {
+                    throw Error.unableToSendEmail(err)
+                }
             }
             throw Error.unknownError(response)
+        }
+    }
+
+    private func postRequest<Message: Content>(_ content: Message, endpoint: String, on container: Container) throws -> Future<Response> {
+        let authKeyEncoded = try encode(apiKey: self.apiKey)
+        
+        var headers = HTTPHeaders([])
+        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
+        
+        let mailgunURL = "\(baseApiUrl)/\(domain)/\(endpoint)"
+        
+        let client = try container.make(Client.self)
+        
+        return client.post(mailgunURL, headers: headers) { req in
+            try req.content.encode(content)
+        }.map { response in
+            try self.process(response)
         }
     }
     
