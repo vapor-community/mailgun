@@ -12,7 +12,7 @@ extension Mailgun {
         public let engine: String?
         public let versionComment: String?
         
-        private enum CodingKeys : String, CodingKey {
+        private enum CodingKeys: String, CodingKey {
             case name
             case description
             case template

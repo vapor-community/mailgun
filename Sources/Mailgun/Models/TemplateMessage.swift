@@ -19,7 +19,7 @@ extension Mailgun {
         public let attachment: [File]?
         public let inline: [File]?
         
-        private enum CodingKeys : String, CodingKey {
+        private enum CodingKeys: String, CodingKey {
             case from
             case to
             case replyTo = "h:Reply-To"
