@@ -42,10 +42,12 @@ extension Mailgun {
             try container.encode(bcc, forKey: .bcc)            
             try container.encode(subject, forKey: .subject)
             try container.encode(template, forKey: .template)
-            guard let jsonData = try? JSONEncoder().encode(templateData), let jsonString = String(data: jsonData, encoding: .utf8) else {
-                throw Error.encodingProblem
+            if let templateData = templateData {
+                guard let jsonData = try? JSONEncoder().encode(templateData), let jsonString = String(data: jsonData, encoding: .utf8) else {
+                    throw Error.encodingProblem
+                }
+                try container.encode(jsonString, forKey: .templateData)
             }
-            try container.encode(jsonString, forKey: .templateData)
             try container.encode(templateVersion, forKey: .templateVersion)
             let text = templateText == true ? "yes" : nil // need to send yes as string
             try container.encode(text, forKey: .templateText)
