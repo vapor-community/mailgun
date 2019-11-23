@@ -66,7 +66,7 @@ router.post("mail") { (req) -> Future<Response> in
     let mailgun = try req.make(Mailgun.self)
     return try mailgun.send(message, on: req) 
     // for selecting a specific domain use 
-    // mailgun.send(message, domain: "mg2.example.com", on: req)
+    // mailgun.send(message, domain: "mg.example2.com", on: req)
     // same for the other functions
 }
 ```
