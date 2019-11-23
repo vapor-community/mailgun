@@ -109,6 +109,7 @@ public struct Mailgun: MailgunProvider {
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
     ///   - domain: API domain
+    ///   - region: Mailgun.Region - .us | .eu
     public init(apiKey: String, domain: String, region: Mailgun.Region) {
         self.apiKey = apiKey
         self.domains = [Mailgun.DomainConfig(domain, region: region)]
@@ -118,7 +119,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
-    ///   - domains: DomainConfigs - Mailgun.DomainConfig("example.com", region: .na)
+    ///   - domains: DomainConfigs - Mailgun.DomainConfig("example.com", region: .us)
     public init(apiKey: String, domains: [Mailgun.DomainConfig]) throws {
         self.apiKey = apiKey
 
@@ -135,6 +136,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: Message
+    ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: Message, domain: String? = nil, on container: Container) throws -> Future<Response> {
@@ -147,6 +149,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: TemplateMessage
+    ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: TemplateMessage, domain: String? = nil, on container: Container) throws -> Future<Response> {
@@ -157,6 +160,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - setup: RouteSetup
+    ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func setup(forwarding setup: RouteSetup, domain: String? = nil, with container: Container) throws -> Future<Response> {
@@ -167,6 +171,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - template: Template
+    ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func createTemplate(_ template: Template, domain: String? = nil, on container: Container) throws -> Future<Response> {
