@@ -26,12 +26,26 @@ Make sure you get an API key and register a custom domain
 
 In `configure.swift`:
 
+#### Single Domain Configuration
+
 ```swift
 let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com", region: .eu)
 services.register(mailgun, as: Mailgun.self)
 ```
 
 > Note: If your private api key begins with `key-`, be sure to include it
+
+#### Multiple Domain Configuration
+
+```swift
+let domain1 = Mailgun.DomainConfig("mg.example.com", region: .eu)
+let domain2 = Mailgun.DomainConfig("mg.example2.com", region: .us)
+let mailgun = try Mailgun(apiKey: "<api key>", domains: [domain1, domain2])
+services.register(mailgun, as: Mailgun.self)
+```
+
+> Note: If you omit the domain parameter (eg in send, createTemplate, ..) it will take the first out of the array - in this case domain1 (mg.example.com)
+
 
 ### Use
 
@@ -50,7 +64,10 @@ router.post("mail") { (req) -> Future<Response> in
     )
 
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.send(message, on: req)
+    return try mailgun.send(message, on: req) 
+    // for selecting a specific domain use 
+    // mailgun.send(message, domain: "mg2.example.com", on: req)
+    // same for the other functions
 }
 ```
 
