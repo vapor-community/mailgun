@@ -101,6 +101,18 @@ public struct Mailgun: MailgunProvider {
     /// DomainConfigs
     public let domains: [DomainConfig]
 
+    // legacy to not break with the multiple domain changes
+    public var domain: String {
+        get {
+            return domains.first?.domain ?? ""
+        }
+    }
+
+    public var region: Mailgun.Region {
+        get {
+            return domains.first?.region ?? .us
+        }
+    }
 
     // MARK: Initialization
     
