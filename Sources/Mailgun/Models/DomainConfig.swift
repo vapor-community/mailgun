@@ -1,5 +1,3 @@
-import Vapor
-
 extension Mailgun {
     /// Config for a Domain (to register multiple in one service)
     public struct DomainConfig {

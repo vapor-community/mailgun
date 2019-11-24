@@ -34,7 +34,7 @@ public struct Mailgun: MailgunProvider {
         // The passed domain is not found in the config
         case domainNotConfigured
 
-        // No domains where passed to the initializer
+        // No domains were passed to the initializer
         case noDomainsConfigured
         
         /// Failed to send email (with error message)
@@ -240,7 +240,7 @@ fileprivate extension Mailgun {
             throw Error.domainNotConfigured 
         }
 
-        let mailgunURL = "\(self.baseApiUrl(for: domainConfig ))/\(domainConfig.domain)/\(endpoint)"
+        let mailgunURL = "\(self.baseApiUrl(for: domainConfig))/\(domainConfig.domain)/\(endpoint)"
         
         let client = try container.make(Client.self)
         
