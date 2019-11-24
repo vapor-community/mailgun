@@ -32,7 +32,7 @@ public struct Mailgun: MailgunProvider {
         case authenticationFailed
 
         // The passed domain is not found in the config
-        case domainNotFound
+        case domainNotConfigured
 
         // No domains where passed to the initializer
         case noDomainsConfigured
@@ -53,8 +53,8 @@ public struct Mailgun: MailgunProvider {
                 return "mailgun.encoding_error"
             case .authenticationFailed:
                 return "mailgun.auth_failed"
-            case .domainNotFound:
-                return "mailgun.domain_not_found"
+            case .domainNotConfigured:
+                return "mailgun.domain_not_configured"
             case .noDomainsConfigured:
                 return "mailgun.no_domains_configured"
             case .unableToSendEmail:
@@ -73,10 +73,10 @@ public struct Mailgun: MailgunProvider {
                 return "Encoding problem"
             case .authenticationFailed:
                 return "Failed authentication"
-            case .domainNotFound:
-                return "Passed domain wasn't found in the config"
+            case .domainNotConfigured:
+                return "The passed domain isn't configured"
             case .noDomainsConfigured:
-                return "No domains where configured"
+                return "No domains were configured"
             case .unableToSendEmail(let err):
                 return "Failed to send email (\(err.message))"
             case .unableToCreateTemplate(let err):
@@ -237,7 +237,7 @@ fileprivate extension Mailgun {
         let dc: DomainConfig? = domain != nil ? self.domains.filter { $0.domain == domain }.first : self.domains.first
 
         guard let domainConfig = dc else {
-            throw Error.domainNotFound 
+            throw Error.domainNotConfigured 
         }
 
         let mailgunURL = "\(self.baseApiUrl(for: domainConfig ))/\(domainConfig.domain)/\(endpoint)"
