@@ -31,7 +31,7 @@ Make sure you get an API key and register a custom domain
 In `configure.swift`:
 
 ```swift
-import FCM
+import Mailgun
 
 // Called before your application initializes.
 func configure(_ app: Application) throws {
