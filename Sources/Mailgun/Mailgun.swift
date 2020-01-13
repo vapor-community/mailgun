@@ -7,10 +7,10 @@ import Foundation
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
     var domains: [Mailgun.DomainConfig] { get }
-    func send(_ content: Mailgun.Message, domain: String?, on container: Container) throws -> Future<Response>
-    func send(_ content: Mailgun.TemplateMessage, domain: String?, on container: Container) throws -> Future<Response>
-    func setup(forwarding: RouteSetup, domain: String?, with container: Container) throws -> Future<Response>
-    func createTemplate(_ template: Mailgun.Template, domain: String?, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.Message, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.TemplateMessage, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
+    func setup(forwarding: RouteSetup, domain: Mailgun.DomainConfig, with container: Container) throws -> Future<Response>
+    func createTemplate(_ template: Mailgun.Template, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
 }
 
 // MARK: - Engine
@@ -31,9 +31,6 @@ public struct Mailgun: MailgunProvider {
         /// Failed authentication
         case authenticationFailed
 
-        // The passed domain is not found in the config
-        case domainNotConfigured
-
         // No domains were passed to the initializer
         case noDomainsConfigured
         
@@ -53,8 +50,6 @@ public struct Mailgun: MailgunProvider {
                 return "mailgun.encoding_error"
             case .authenticationFailed:
                 return "mailgun.auth_failed"
-            case .domainNotConfigured:
-                return "mailgun.domain_not_configured"
             case .noDomainsConfigured:
                 return "mailgun.no_domains_configured"
             case .unableToSendEmail:
@@ -73,8 +68,6 @@ public struct Mailgun: MailgunProvider {
                 return "Encoding problem"
             case .authenticationFailed:
                 return "Failed authentication"
-            case .domainNotConfigured:
-                return "The passed domain isn't configured"
             case .noDomainsConfigured:
                 return "No domains were configured"
             case .unableToSendEmail(let err):
@@ -101,31 +94,7 @@ public struct Mailgun: MailgunProvider {
     /// DomainConfigs
     public let domains: [DomainConfig]
 
-    // legacy to not break with the multiple domain changes
-    public var domain: String {
-        get {
-            return domains.first?.domain ?? ""
-        }
-    }
-
-    public var region: Mailgun.Region {
-        get {
-            return domains.first?.region ?? .us
-        }
-    }
-
     // MARK: Initialization
-    
-    /// Initializer
-    ///
-    /// - Parameters:
-    ///   - apiKey: API key including "key-" prefix
-    ///   - domain: API domain
-    ///   - region: Mailgun.Region - .us | .eu
-    public init(apiKey: String, domain: String, region: Mailgun.Region) {
-        self.apiKey = apiKey
-        self.domains = [Mailgun.DomainConfig(domain, region: region)]
-    }
 
     /// Initializer
     ///
@@ -151,7 +120,7 @@ public struct Mailgun: MailgunProvider {
     ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: Message, domain: String? = nil, on container: Container) throws -> Future<Response> {
+    public func send(_ content: Message, domain: DomainConfig, on container: Container) throws -> Future<Response> {
         return try postRequest(content, endpoint: "messages", domain: domain, on: container)
     }
 
@@ -164,7 +133,7 @@ public struct Mailgun: MailgunProvider {
     ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: TemplateMessage, domain: String? = nil, on container: Container) throws -> Future<Response> {
+    public func send(_ content: TemplateMessage, domain: DomainConfig, on container: Container) throws -> Future<Response> {
         return try postRequest(content, endpoint: "messages", domain: domain, on: container)
     }
     
@@ -175,7 +144,7 @@ public struct Mailgun: MailgunProvider {
     ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func setup(forwarding setup: RouteSetup, domain: String? = nil, with container: Container) throws -> Future<Response> {
+    public func setup(forwarding setup: RouteSetup, domain: DomainConfig, with container: Container) throws -> Future<Response> {
         return try postRequest(setup, endpoint: "v3/routes", domain: domain, on: container)
     }
 
@@ -186,7 +155,7 @@ public struct Mailgun: MailgunProvider {
     ///   - domain: String? 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func createTemplate(_ template: Template, domain: String? = nil, on container: Container) throws -> Future<Response> {
+    public func createTemplate(_ template: Template, domain: DomainConfig, on container: Container) throws -> Future<Response> {
         return try postRequest(template, endpoint: "templates", domain: domain, on: container)
     }
 }
@@ -228,18 +197,12 @@ fileprivate extension Mailgun {
         }
     }
 
-    private func postRequest<Message: Content>(_ content: Message, endpoint: String, domain: String? = nil, on container: Container) throws -> Future<Response> {
+    private func postRequest<Message: Content>(_ content: Message, endpoint: String, domain domainConfig: DomainConfig, on container: Container) throws -> Future<Response> {
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
         
-        let dc: DomainConfig? = domain != nil ? self.domains.filter { $0.domain == domain }.first : self.domains.first
-
-        guard let domainConfig = dc else {
-            throw Error.domainNotConfigured 
-        }
-
         let mailgunURL = "\(self.baseApiUrl(for: domainConfig))/\(domainConfig.domain)/\(endpoint)"
         
         let client = try container.make(Client.self)
