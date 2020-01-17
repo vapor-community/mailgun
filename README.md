@@ -27,6 +27,9 @@ Make sure you get an API key and register a custom domain
 In `configure.swift`:
 
 ```swift
+let mailgun = Mailgun(apiKey: "<api key>")
+services.register(mailgun, as: Mailgun.self)
+
 // Put this extension at the bottom or create a new file for it
 extension Mailgun.DomainConfig {
     static var euDomain: Mailgun.DomainConfig {
@@ -36,9 +39,6 @@ extension Mailgun.DomainConfig {
         return Mailgun.DomainConfig("mg2.example.com", region: .us)
     }
 }
-
-let mailgun = try Mailgun(apiKey: "<api key>", domains: [.euDomain, .usDomain])
-services.register(mailgun, as: Mailgun.self)
 ```
 
 > Note: If your private api key begins with `key-`, be sure to include it

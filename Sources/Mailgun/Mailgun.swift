@@ -6,7 +6,6 @@ import Foundation
 
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
-    var domains: [Mailgun.DomainConfig] { get }
     func send(_ content: Mailgun.Message, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
     func send(_ content: Mailgun.TemplateMessage, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
     func setup(forwarding: RouteSetup, domain: Mailgun.DomainConfig, with container: Container) throws -> Future<Response>
@@ -30,9 +29,6 @@ public struct Mailgun: MailgunProvider {
         
         /// Failed authentication
         case authenticationFailed
-
-        // No domains were passed to the initializer
-        case noDomainsConfigured
         
         /// Failed to send email (with error message)
         case unableToSendEmail(ErrorResponse)
@@ -50,8 +46,6 @@ public struct Mailgun: MailgunProvider {
                 return "mailgun.encoding_error"
             case .authenticationFailed:
                 return "mailgun.auth_failed"
-            case .noDomainsConfigured:
-                return "mailgun.no_domains_configured"
             case .unableToSendEmail:
                 return "mailgun.send_email_failed"
             case .unableToCreateTemplate:
@@ -68,8 +62,6 @@ public struct Mailgun: MailgunProvider {
                 return "Encoding problem"
             case .authenticationFailed:
                 return "Failed authentication"
-            case .noDomainsConfigured:
-                return "No domains were configured"
             case .unableToSendEmail(let err):
                 return "Failed to send email (\(err.message))"
             case .unableToCreateTemplate(let err):
@@ -90,9 +82,6 @@ public struct Mailgun: MailgunProvider {
     
     /// API key (including "key-" prefix)
     public let apiKey: String
-    
-    /// DomainConfigs
-    public let domains: [DomainConfig]
 
     // MARK: Initialization
 
@@ -101,14 +90,8 @@ public struct Mailgun: MailgunProvider {
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
     ///   - domains: DomainConfigs - Mailgun.DomainConfig("example.com", region: .us)
-    public init(apiKey: String, domains: [Mailgun.DomainConfig]) throws {
+    public init(apiKey: String) {
         self.apiKey = apiKey
-
-        guard domains.count > 0 else {
-            throw Error.noDomainsConfigured
-        }
-
-        self.domains = domains
     }
     
     // MARK: Send message
