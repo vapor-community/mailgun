@@ -89,7 +89,6 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
-    ///   - domains: DomainConfigs - Mailgun.DomainConfig("example.com", region: .us)
     public init(apiKey: String) {
         self.apiKey = apiKey
     }
@@ -100,7 +99,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: Message
-    ///   - domain: String? 
+    ///   - domain: DomainConfig
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: Message, domain: DomainConfig, on container: Container) throws -> Future<Response> {
@@ -113,7 +112,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: TemplateMessage
-    ///   - domain: String? 
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func send(_ content: TemplateMessage, domain: DomainConfig, on container: Container) throws -> Future<Response> {
@@ -124,7 +123,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - setup: RouteSetup
-    ///   - domain: String? 
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func setup(forwarding setup: RouteSetup, domain: DomainConfig, with container: Container) throws -> Future<Response> {
@@ -135,7 +134,7 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - template: Template
-    ///   - domain: String? 
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
     public func createTemplate(_ template: Template, domain: DomainConfig, on container: Container) throws -> Future<Response> {
