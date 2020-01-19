@@ -76,7 +76,7 @@ req.mailgun().send(...)
 
 // or call it with domain
 app.mailgun(.myApp1).send(...)
-app.mailgun(.myApp1).send(...)
+req.mailgun(.myApp1).send(...)
 ```
 
 In `configure.swift`
