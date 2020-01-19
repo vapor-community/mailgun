@@ -46,6 +46,8 @@ func configure(_ app: Application) throws {
 } 
 ```
 
+> Note: If your private api key begins with `key-`, be sure to include it
+
 ### Declare all your domains
 
 ```swift
@@ -56,9 +58,6 @@ extension MailgunDomain {
     static var myApp4: MailgunDomain { .init("mg.myapp4.com", .eu) }
 }
 ```
-
-
-> Note: If your private api key begins with `key-`, be sure to include it
 
 ### Use
 
