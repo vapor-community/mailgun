@@ -38,11 +38,11 @@ func configure(_ app: Application) throws {
     /// case 1
     /// put into your environment variables the following keys:
     /// MAILGUN_API_KEY=...
-    app.mailgun.configuration = .environment
+    app.mailgunConfiguration = .environment
 
     /// case 2
     /// manually
-    app.mailgun.configuration = .init(apiKey: "<api key>")
+    app.mailgunConfiguration = .init(apiKey: "<api key>")
 } 
 ```
 

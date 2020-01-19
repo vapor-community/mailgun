@@ -5,14 +5,18 @@ import Foundation
 // MARK: - Service
 
 public protocol MailgunProvider {
-    var configuration: MailgunConfiguration? { get set }
     func send(_ content: MailgunMessage) throws -> EventLoopFuture<ClientResponse>
     func send(_ content: MailgunTemplateMessage) throws -> EventLoopFuture<ClientResponse>
     func setup(forwarding: MailgunRouteSetup) throws -> EventLoopFuture<ClientResponse>
     func createTemplate(_ template: MailgunTemplate) throws -> EventLoopFuture<ClientResponse>
 }
 
-public struct Mailgun: MailgunProvider {
+internal protocol _MailgunProvider: MailgunProvider {
+    var application: Application { get }
+    var configuration: MailgunConfiguration? { get }
+}
+
+public struct Mailgun: _MailgunProvider {
     let application: Application
     let domain: MailgunDomain
     
@@ -26,17 +30,22 @@ public struct Mailgun: MailgunProvider {
 
 // MARK: - Configuration
 
-extension Mailgun {
+extension _MailgunProvider {
+    var configuration: MailgunConfiguration? { application.mailgunConfiguration }
+}
+
+extension Application {
     struct ConfigurationKey: StorageKey {
         typealias Value = MailgunConfiguration
     }
 
-    public var configuration: MailgunConfiguration? {
+    /// Global Mailgun configuration for all the domains
+    public var mailgunConfiguration: MailgunConfiguration? {
         get {
-            application.storage[ConfigurationKey.self]
+            storage[ConfigurationKey.self]
         }
-        nonmutating set {
-            application.storage[ConfigurationKey.self] = newValue
+        set {
+            storage[ConfigurationKey.self] = newValue
         }
     }
 }
