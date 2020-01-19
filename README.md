@@ -79,7 +79,7 @@ app.mailgun(.myApp1).send(...)
 req.mailgun(.myApp1).send(...)
 ```
 
-In `configure.swift`
+#### In `configure.swift`
 
 ```swift
 import Mailgun
@@ -95,11 +95,11 @@ func configure(_ app: Application) throws {
 } 
 ```
 
-All the examples below will be with  `Request`, but you could do the same with `Application` as in example above.
+> 💡 NOTE: All the examples below will be with `Request`, but you could do the same with `Application` as in example above.
 
-In `routes.swift`:
+#### In `routes.swift`:
 
-#### Without attachments
+##### Without attachments
 
 ```swift
 import Mailgun
@@ -118,7 +118,7 @@ func routes(_ app: Application) throws {
 }
 ```
 
-#### With attachments
+##### With attachments
 
 ```swift
 import Mailgun
@@ -146,7 +146,7 @@ func routes(_ app: Application) throws {
 }
 ```
 
-#### With template (attachments can be used in same way)
+##### With template (attachments can be used in same way)
 
 ```swift
 import Mailgun
@@ -165,7 +165,7 @@ func routes(_ app: Application) throws {
 }
 ```
 
-#### Setup content through Leaf
+##### Setup content through Leaf
 
 Using Vapor Leaf, you can easily setup your HTML Content.
 
@@ -203,7 +203,7 @@ func routes(_ app: Application) throws {
 }
 ```
 
-#### Setup routes
+##### Setup routes
 
 ```swift
 public func configure(_ app: Application) throws {
@@ -215,7 +215,7 @@ public func configure(_ app: Application) throws {
 }
 ```
 
-#### Handle routes
+##### Handle routes
 
 ```swift
 import Mailgun
@@ -234,7 +234,7 @@ func routes(_ app: Application) throws {
 }
 ```
 
-#### Creating templates
+##### Creating templates
 
 ```swift
 import Mailgun
