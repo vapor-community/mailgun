@@ -1,6 +1,6 @@
 import Vapor
 
-public class MailgunStorage {
+public struct MailgunStorage {
     let application: Application
     
     init (_ application: Application) {
@@ -16,7 +16,7 @@ public class MailgunStorage {
         get {
             application.storage[ConfigurationKey.self]
         }
-        set {
+        nonmutating set {
             application.storage[ConfigurationKey.self] = newValue
         }
     }
@@ -30,7 +30,7 @@ public class MailgunStorage {
         get {
             application.storage[DefaultDomainKey.self]
         }
-        set {
+        nonmutating set {
             application.storage[DefaultDomainKey.self] = newValue
         }
     }
