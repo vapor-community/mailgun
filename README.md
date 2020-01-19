@@ -38,20 +38,31 @@ func configure(_ app: Application) throws {
     /// case 1
     /// put into your environment variables the following keys:
     /// MAILGUN_API_KEY=...
-    /// MAILGUN_DOMAIN=...
-    /// MAILGUN_REGION=...
     app.mailgun.configuration = .environment
 
     /// case 2
     /// manually
-    app.mailgun.configuration = .init(apiKey: "<api key>", domain: "mg.example.com", region: .eu)
+    app.mailgun.configuration = .init(apiKey: "<api key>")
 } 
+```
+
+### Declare all your domains
+
+```swift
+extension MailgunDomain {
+    static var myApp1: MailgunDomain { .init("mg.myapp1.com", .us) }
+    static var myApp2: MailgunDomain { .init("mg.myapp2.com", .eu) }
+    static var myApp3: MailgunDomain { .init("mg.myapp3.com", .us) }
+    static var myApp4: MailgunDomain { .init("mg.myapp4.com", .eu) }
+}
 ```
 
 
 > Note: If your private api key begins with `key-`, be sure to include it
 
 ### Use
+
+> Note: you could call `.mailgun(.myApp1)` from both `Application` and `Request`
 
 In `routes.swift`:
 
@@ -69,7 +80,7 @@ func routes(_ app: Application) throws {
             text: "This is a newsletter",
             html: "<h1>This is a newsletter</h1>"
         )
-        return req.mailgun.send(message)
+        return req.mailgun(.myApp1).send(message)
     }
 }
 ```
@@ -97,7 +108,7 @@ func routes(_ app: Application) throws {
             html: "<h1>This is a newsletter</h1>",
             attachments: [attachment]
         )
-        return req.mailgun.send(message)
+        return req.mailgun(.myApp1).send(message)
     }
 }
 ```
@@ -116,7 +127,7 @@ func routes(_ app: Application) throws {
             template: "my-template",
             templateData: ["foo": "bar"]
         )
-        return req.mailgun.send(message)
+        return req.mailgun(.myApp1).send(message)
     }
 }
 ```
@@ -154,7 +165,7 @@ func routes(_ app: Application) throws {
             html: content
         )
         
-        return req.mailgun.send(message)
+        return req.mailgun(.myApp1).send(message)
     }
 }
 ```
@@ -199,7 +210,7 @@ func routes(_ app: Application) throws {
     let mailgunGroup = app.grouped("mailgun")
     mailgunGroup.post("template") { req -> EventLoopFuture<ClientResponse> in
         let template = MailgunTemplate(name: "my-template", description: "api created :)", template: "<h1>Hello {{ name }}</h1>")
-        return req.mailgun.createTemplate(template)
+        return req.mailgun(.myApp1).createTemplate(template)
     }
 }
 ```

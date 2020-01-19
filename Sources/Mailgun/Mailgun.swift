@@ -14,11 +14,13 @@ public protocol MailgunProvider {
 
 public struct Mailgun: MailgunProvider {
     let application: Application
+    let domain: MailgunDomain
     
     // MARK: Initialization
     
-    public init (_ app: Application) {
-        application = app
+    public init (_ application: Application, _ domain: MailgunDomain) {
+        self.application = application
+        self.domain = domain
     }
 }
 
@@ -42,6 +44,14 @@ extension Mailgun {
 // MARK: - Send message
 
 extension Mailgun {
+    /// Base API URL based on the current region
+    var baseApiUrl: String {
+        switch domain.region {
+        case .us: return "https://api.mailgun.net/v3"
+        case .eu: return "https://api.eu.mailgun.net/v3"
+        }
+    }
+    
     /// Send message
     ///
     /// - Parameters:
@@ -84,11 +94,11 @@ extension Mailgun {
 }
 
 extension Application {
-    public var mailgun: Mailgun { .init(self) }
+    public func mailgun(_ domain: MailgunDomain) -> Mailgun { .init(self, domain) }
 }
 
 extension Request {
-    public var mailgun: Mailgun { .init(application) }
+    public func mailgun(_ domain: MailgunDomain) -> Mailgun { .init(application, domain) }
 }
 
 // MARK: - Private
@@ -116,7 +126,7 @@ fileprivate extension Mailgun {
             headers.add(name: .authorization, value: "Basic \(authKeyEncoded)")
             return headers
         }.flatMap { headers in
-            let mailgunURI = URI(string: "\(configuration.baseApiUrl)/\(configuration.domain)/\(endpoint)")
+            let mailgunURI = URI(string: "\(self.baseApiUrl)/\(self.domain.domain)/\(endpoint)")
             return self.application.client.post(mailgunURI, headers: headers) { req in
                 try req.content.encode(content)
             }.flatMapThrowing {
