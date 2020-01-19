@@ -8,14 +8,14 @@
 ##
 
 `Mailgun` is a Vapor 4 service for a popular [email sending API](https://www.mailgun.com/)
-> Note: Vapor3 version is available in `vapor3` branch and from `1.5.0` tag
+> Note: Vapor3 version is available in `vapor3` branch and from `3.0.0` tag
 
 
 ## Installation
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/twof/VaporMailgunService.git", from: "2.0.0")
+.package(url: "https://github.com/twof/VaporMailgunService.git", from: "4.0.0")
 
 //and in targets add
 //"Mailgun"
