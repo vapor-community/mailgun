@@ -1,6 +1,12 @@
 import Vapor
 
 extension Application {
+    /// Mailgun storage, use it to configure mailgun.
+    ///
+    /// ```swift
+    /// app.mailgun.configuration = .environment
+    /// app.mailgun.defaultDomain = .init("mg.example.com", .eu)
+    /// ```
     public var mailgun: MailgunStorage {
         .init(self)
     }
