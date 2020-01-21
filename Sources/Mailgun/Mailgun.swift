@@ -1,111 +1,44 @@
 import Vapor
 import Foundation
 
-
 // MARK: - Service
 
-public protocol MailgunProvider: Service {
-    var apiKey: String { get }
-    var domain: String { get }
-    var region: Mailgun.Region { get }
-    func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
-    func send(_ content: Mailgun.TemplateMessage, on container: Container) throws -> Future<Response>
-    func setup(forwarding: RouteSetup, with container: Container) throws -> Future<Response>
-    func createTemplate(_ template: Mailgun.Template, on container: Container) throws -> Future<Response>
+public protocol MailgunProvider {
+    func send(_ content: MailgunMessage) throws -> EventLoopFuture<ClientResponse>
+    func send(_ content: MailgunTemplateMessage) throws -> EventLoopFuture<ClientResponse>
+    func setup(forwarding: MailgunRouteSetup) throws -> EventLoopFuture<ClientResponse>
+    func createTemplate(_ template: MailgunTemplate) throws -> EventLoopFuture<ClientResponse>
 }
 
-// MARK: - Engine
+internal protocol _MailgunProvider: MailgunProvider {
+    var application: Application { get }
+    var storage: MailgunStorage { get }
+}
 
-public struct Mailgun: MailgunProvider {
-    
-    /// Describes a region: US or EU
-    public enum Region {
-        case us
-        case eu
-    }
-    
-    public enum Error: Debuggable {
-        
-        /// Encoding problem
-        case encodingProblem
-        
-        /// Failed authentication
-        case authenticationFailed
-        
-        /// Failed to send email (with error message)
-        case unableToSendEmail(ErrorResponse)
-
-        /// Failed to create template (with error message)
-        case unableToCreateTemplate(ErrorResponse)
-
-        /// Generic error
-        case unknownError(Response)
-        
-        /// Identifier
-        public var identifier: String {
-            switch self {
-            case .encodingProblem:
-                return "mailgun.encoding_error"
-            case .authenticationFailed:
-                return "mailgun.auth_failed"
-            case .unableToSendEmail:
-                return "mailgun.send_email_failed"
-            case .unableToCreateTemplate:
-                return "mailgun.create_template_failed"
-            case .unknownError:
-                return "mailgun.unknown_error"
-            }
-        }
-        
-        /// Reason
-        public var reason: String {
-            switch self {
-            case .encodingProblem:
-                return "Encoding problem"
-            case .authenticationFailed:
-                return "Failed authentication"
-            case .unableToSendEmail(let err):
-                return "Failed to send email (\(err.message))"
-            case .unableToCreateTemplate(let err):
-                return "Failed to create template (\(err.message))"
-            case .unknownError:
-                return "Generic error"
-            }
-        } 
-    }
-    
-    /// Error response object
-    public struct ErrorResponse: Decodable {
-        
-        /// Error messsage
-        public let message: String
-        
-    }
-    
-    /// API key (including "key-" prefix)
-    public let apiKey: String
-    
-    /// Domain
-    public let domain: String
-    
-    /// Region
-    public let region: Mailgun.Region
+public struct Mailgun: _MailgunProvider {
+    let application: Application
+    let domain: MailgunDomain
+    let storage: MailgunStorage
     
     // MARK: Initialization
     
-    
-    /// Initializer
-    ///
-    /// - Parameters:
-    ///   - apiKey: API key including "key-" prefix
-    ///   - domain: API domain
-    public init(apiKey: String, domain: String, region: Mailgun.Region) {
-        self.apiKey = apiKey
+    public init (_ application: Application, _ domain: MailgunDomain) {
+        self.application = application
         self.domain = domain
-        self.region = region
+        self.storage = MailgunStorage(application)
     }
-    
-    // MARK: Send message
+}
+
+// MARK: - Send message
+
+extension Mailgun {
+    /// Base API URL based on the current region
+    var baseApiUrl: String {
+        switch domain.region {
+        case .us: return "https://api.mailgun.net/v3"
+        case .eu: return "https://api.eu.mailgun.net/v3"
+        }
+    }
     
     /// Send message
     ///
@@ -113,20 +46,18 @@ public struct Mailgun: MailgunProvider {
     ///   - content: Message
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: Message, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, endpoint: "messages", on: container)
+    public func send(_ content: MailgunMessage) -> EventLoopFuture<ClientResponse> {
+        postRequest(content, endpoint: "messages")
     }
 
-    // MARK: Send message
-    
     /// Send message
     ///
     /// - Parameters:
     ///   - content: TemplateMessage
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: TemplateMessage, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, endpoint: "messages", on: container)
+    public func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse> {
+        postRequest(content, endpoint: "messages")
     }
     
     /// Setup forwarding
@@ -135,8 +66,8 @@ public struct Mailgun: MailgunProvider {
     ///   - setup: RouteSetup
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func setup(forwarding setup: RouteSetup, with container: Container) throws -> Future<Response> {
-        return try postRequest(setup, endpoint: "v3/routes", on: container)
+    public func setup(forwarding setup: MailgunRouteSetup) -> EventLoopFuture<ClientResponse> {
+        postRequest(setup, endpoint: "v3/routes")
     }
 
     /// Create template
@@ -145,73 +76,16 @@ public struct Mailgun: MailgunProvider {
     ///   - template: Template
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func createTemplate(_ template: Template, on container: Container) throws -> Future<Response> {
-        return try postRequest(template, endpoint: "templates", on: container)
+    public func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<ClientResponse> {
+        postRequest(template, endpoint: "templates")
     }
-}
-
-// MARK: Private
-
-fileprivate extension Mailgun {
-    private var baseApiUrl: String {
-        return region == .eu ? "https://api.eu.mailgun.net/v3" : "https://api.mailgun.net/v3"
-    }
-    
-    func encode(apiKey: String) throws -> String {
-        guard let apiKeyData = "api:\(apiKey)".data(using: .utf8) else {
-            throw Error.encodingProblem
-        }
-        let authKey = apiKeyData.base64EncodedData()
-        guard let authKeyEncoded = String.init(data: authKey, encoding: .utf8) else {
-            throw Error.encodingProblem
-        }
-        
-        return authKeyEncoded
-    }
-    
-    private func process(_ response: Response) throws -> Response {
-        switch true {
-        case response.http.status.code == HTTPStatus.ok.code:
-            return response
-        case response.http.status.code == HTTPStatus.unauthorized.code:
-            throw Error.authenticationFailed
-        default:
-            if let data = response.http.body.data, let err = (try? JSONDecoder().decode(ErrorResponse.self, from: data)) {
-                if (err.message.hasPrefix("template")) {
-                    throw Error.unableToCreateTemplate(err)
-                } else {
-                    throw Error.unableToSendEmail(err)
-                }
-            }
-            throw Error.unknownError(response)
-        }
-    }
-
-    private func postRequest<Message: Content>(_ content: Message, endpoint: String, on container: Container) throws -> Future<Response> {
-        let authKeyEncoded = try encode(apiKey: self.apiKey)
-        
-        var headers = HTTPHeaders([])
-        headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
-        
-        let mailgunURL = "\(baseApiUrl)/\(domain)/\(endpoint)"
-        
-        let client = try container.make(Client.self)
-        
-        return client.post(mailgunURL, headers: headers) { req in
-            try req.content.encode(content)
-        }.map { response in
-            try self.process(response)
-        }
-    }
-    
 }
 
 // MARK: - Conversions
 
-extension Array where Element == Mailgun.Message.FullEmail {
-    
+extension Array where Element == MailgunMessage.FullEmail {
     var stringArray: [String] {
-        return map { entry -> String in
+        map { entry in
             guard let name = entry.name else {
                 return entry.email
             }
