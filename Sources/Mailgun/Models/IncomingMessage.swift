@@ -3,7 +3,7 @@ import Vapor
 public struct MailgunIncomingMessage: Content {
     public static var defaultContentType: HTTPMediaType = .formData
     
-    public let recipients: String
+    public let recipient: String
     public let sender: String
     public let from: String
     public let subject: String
@@ -17,13 +17,13 @@ public struct MailgunIncomingMessage: Content {
     public let attachments: [Attachment]?
     
     enum CodingKeys: String, CodingKey {
-        case recipients
+        case recipient
         case sender
         case from
         case subject
         case bodyPlain = "body-plain"
         case strippedText = "stripped-text"
-        case strippedSignature = "stripped-signiture"
+        case strippedSignature = "stripped-signature"
         case bodyHTML = "body-html"
         case strippedHTML = "stripped-html"
         case messageHeaders = "message-headers"
