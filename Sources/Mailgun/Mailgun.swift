@@ -6,12 +6,10 @@ import Foundation
 
 public protocol MailgunProvider: Service {
     var apiKey: String { get }
-    var domain: String { get }
-    var region: Mailgun.Region { get }
-    func send(_ content: Mailgun.Message, on container: Container) throws -> Future<Response>
-    func send(_ content: Mailgun.TemplateMessage, on container: Container) throws -> Future<Response>
-    func setup(forwarding: RouteSetup, with container: Container) throws -> Future<Response>
-    func createTemplate(_ template: Mailgun.Template, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.Message, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
+    func send(_ content: Mailgun.TemplateMessage, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
+    func setup(forwarding: RouteSetup, domain: Mailgun.DomainConfig, with container: Container) throws -> Future<Response>
+    func createTemplate(_ template: Mailgun.Template, domain: Mailgun.DomainConfig, on container: Container) throws -> Future<Response>
 }
 
 // MARK: - Engine
@@ -84,25 +82,15 @@ public struct Mailgun: MailgunProvider {
     
     /// API key (including "key-" prefix)
     public let apiKey: String
-    
-    /// Domain
-    public let domain: String
-    
-    /// Region
-    public let region: Mailgun.Region
-    
+
     // MARK: Initialization
-    
-    
+
     /// Initializer
     ///
     /// - Parameters:
     ///   - apiKey: API key including "key-" prefix
-    ///   - domain: API domain
-    public init(apiKey: String, domain: String, region: Mailgun.Region) {
+    public init(apiKey: String) {
         self.apiKey = apiKey
-        self.domain = domain
-        self.region = region
     }
     
     // MARK: Send message
@@ -111,10 +99,11 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: Message
+    ///   - domain: DomainConfig
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: Message, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, endpoint: "messages", on: container)
+    public func send(_ content: Message, domain: DomainConfig, on container: Container) throws -> Future<Response> {
+        return try postRequest(content, endpoint: "messages", domain: domain, on: container)
     }
 
     // MARK: Send message
@@ -123,38 +112,41 @@ public struct Mailgun: MailgunProvider {
     ///
     /// - Parameters:
     ///   - content: TemplateMessage
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: TemplateMessage, on container: Container) throws -> Future<Response> {
-        return try postRequest(content, endpoint: "messages", on: container)
+    public func send(_ content: TemplateMessage, domain: DomainConfig, on container: Container) throws -> Future<Response> {
+        return try postRequest(content, endpoint: "messages", domain: domain, on: container)
     }
     
     /// Setup forwarding
     ///
     /// - Parameters:
     ///   - setup: RouteSetup
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func setup(forwarding setup: RouteSetup, with container: Container) throws -> Future<Response> {
-        return try postRequest(setup, endpoint: "v3/routes", on: container)
+    public func setup(forwarding setup: RouteSetup, domain: DomainConfig, with container: Container) throws -> Future<Response> {
+        return try postRequest(setup, endpoint: "v3/routes", domain: domain, on: container)
     }
 
     /// Create template
     ///
     /// - Parameters:
     ///   - template: Template
+    ///   - domain: DomainConfig 
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func createTemplate(_ template: Template, on container: Container) throws -> Future<Response> {
-        return try postRequest(template, endpoint: "templates", on: container)
+    public func createTemplate(_ template: Template, domain: DomainConfig, on container: Container) throws -> Future<Response> {
+        return try postRequest(template, endpoint: "templates", domain: domain, on: container)
     }
 }
 
 // MARK: Private
 
 fileprivate extension Mailgun {
-    private var baseApiUrl: String {
-        return region == .eu ? "https://api.eu.mailgun.net/v3" : "https://api.mailgun.net/v3"
+    private func baseApiUrl(for domainConfig: DomainConfig) -> String {
+        return domainConfig.region == .eu ? "https://api.eu.mailgun.net/v3" : "https://api.mailgun.net/v3"
     }
     
     func encode(apiKey: String) throws -> String {
@@ -187,13 +179,13 @@ fileprivate extension Mailgun {
         }
     }
 
-    private func postRequest<Message: Content>(_ content: Message, endpoint: String, on container: Container) throws -> Future<Response> {
+    private func postRequest<Message: Content>(_ content: Message, endpoint: String, domain domainConfig: DomainConfig, on container: Container) throws -> Future<Response> {
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
         headers.add(name: HTTPHeaderName.authorization, value: "Basic \(authKeyEncoded)")
         
-        let mailgunURL = "\(baseApiUrl)/\(domain)/\(endpoint)"
+        let mailgunURL = "\(self.baseApiUrl(for: domainConfig))/\(domainConfig.domain)/\(endpoint)"
         
         let client = try container.make(Client.self)
         

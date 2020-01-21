@@ -14,7 +14,7 @@
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/twof/VaporMailgunService.git", from: "1.5.0")
+.package(url: "https://github.com/twof/VaporMailgunService.git", from: "3.0.0")
 ```
 
 ## Usage
@@ -27,11 +27,22 @@ Make sure you get an API key and register a custom domain
 In `configure.swift`:
 
 ```swift
-let mailgun = Mailgun(apiKey: "<api key>", domain: "mg.example.com", region: .eu)
+let mailgun = Mailgun(apiKey: "<api key>")
 services.register(mailgun, as: Mailgun.self)
+
+// Put this extension at the bottom or create a new file for it
+extension Mailgun.DomainConfig {
+    static var euDomain: Mailgun.DomainConfig {
+        return Mailgun.DomainConfig("mg.example.com", region: .eu)
+    }
+    static var usDomain: Mailgun.DomainConfig {
+        return Mailgun.DomainConfig("mg2.example.com", region: .us)
+    }
+}
 ```
 
 > Note: If your private api key begins with `key-`, be sure to include it
+
 
 ### Use
 
@@ -50,7 +61,7 @@ router.post("mail") { (req) -> Future<Response> in
     )
 
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.send(message, on: req)
+    return try mailgun.send(message, domain: .euDomain, on: req) 
 }
 ```
 
@@ -73,7 +84,7 @@ router.post("mail") { (req) -> Future<Response> in
     )
 
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.send(message, on: req)
+    return try mailgun.send(message, domain: .euDomain, on: req)
 }
 ```
 
@@ -90,7 +101,7 @@ router.post("mail") { (req) -> Future<Response> in
     )
 
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.send(message, on: req)
+    return try mailgun.send(message, domain: .euDomain, on: req)
 }
 ```
 
@@ -125,7 +136,7 @@ router.post("mail") { (req) -> Future<Response> in
     )
 
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.send(message, on: req)
+    return try mailgun.send(message, domain: .euDomain, on: req)
 }
 ```
 
@@ -136,7 +147,7 @@ public func boot(_ app: Application) throws {
     // sets up a catch_all forward for the route listed
     let routeSetup = RouteSetup(forwardURL: "http://example.com/mailgun/all", description: "A route for all emails")
     let mailgunClient = try app.make(Mailgun.self)
-    try mailgunClient.setup(forwarding: routeSetup, with: app).map { (resp) in
+    try mailgunClient.setup(forwarding: routeSetup, domain: .euDomain, with: app).map { (resp) in
         print(resp)
     }
 }
@@ -163,6 +174,6 @@ router.post("template") { (req) -> Future<Response> in
     let template = Mailgun.Template(name: "my-template", description: "api created :)", template: "<h1>Hello {{ name }}</h1>")
     
     let mailgun = try req.make(Mailgun.self)
-    return try mailgun.createTemplate(template, on: req)
+    return try mailgun.createTemplate(template, domain: .euDomain, on: req)
 }
 ```
