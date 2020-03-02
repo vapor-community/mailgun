@@ -1,8 +1,8 @@
 # Vapor Mailgun Service
 
 [![Discord](https://img.shields.io/badge/join-discord-745EAF.svg?style=flat)](https://vapor.team)
-[![Platforms](https://img.shields.io/badge/platforms-macOS%2010.14%20|%20Ubuntu%2016.04%20LTS-ff0000.svg?style=flat)](http://cocoapods.org/pods/FASwift)
-[![Swift 5.1](https://img.shields.io/badge/swift-5.1-orange.svg?style=flat)](http://swift.org)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%2010.15%20|%20Ubuntu%2016.04%20LTS-ff0000.svg?style=flat)](http://cocoapods.org/pods/FASwift)
+[![Swift 5.2](https://img.shields.io/badge/swift-5.2-orange.svg?style=flat)](http://swift.org)
 [![Vapor 4](https://img.shields.io/badge/vapor-4.0-blue.svg?style=flat)](https://vapor.codes)
 
 ##
@@ -17,8 +17,10 @@ Vapor Mailgun Service can be installed with Swift Package Manager
 ```swift
 .package(url: "https://github.com/twof/VaporMailgunService.git", from: "4.0.0")
 
-//and in targets add
-//"Mailgun"
+.target(name: "App", dependencies: [
+    .product(name: "Vapor", package: "vapor"),
+    .product(name: "Mailgun", package: "VaporMailgunService")
+])
 ```
 
 ## Usage
@@ -43,7 +45,7 @@ func configure(_ app: Application) throws {
     /// case 2
     /// manually
     app.mailgun.configuration = .init(apiKey: "<api key>")
-} 
+}
 ```
 
 > Note: If your private api key begins with `key-`, be sure to include it
@@ -87,12 +89,12 @@ import Mailgun
 // Called before your application initializes.
 func configure(_ app: Application) throws {
     /// configure mailgun
-    
+
     /// then you're ready to use it
     app.mailgun(.myApp1).send(...).whenSuccess { response in
         print("just sent: \(response)")
     }
-} 
+}
 ```
 
 > 💡 NOTE: All the examples below will be with `Request`, but you could do the same with `Application` as in example above.
@@ -197,7 +199,7 @@ func routes(_ app: Application) throws {
             text: "",
             html: content
         )
-        
+
         return req.mailgun().send(message)
     }
 }
