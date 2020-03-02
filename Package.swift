@@ -23,10 +23,12 @@ let package = Package(
         .target(
             name: "Mailgun",
             dependencies: [
-                "Vapor"
+                .product(name: "Vapor", package: "vapor"),
             ]),
         .testTarget(
             name: "MailgunTests",
-            dependencies: ["Mailgun"]),
+            dependencies: [
+                .target(name: "Mailgun"),
+        ]),
     ]
 )
