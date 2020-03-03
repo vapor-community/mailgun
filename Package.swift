@@ -1,12 +1,12 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "Mailgun",
+    name: "VaporMailgunService",
     platforms: [
-       .macOS(.v10_14)
+       .macOS(.v10_15)
     ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
@@ -15,7 +15,7 @@ let package = Package(
             targets: ["Mailgun"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-beta.3")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-rc")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -23,10 +23,12 @@ let package = Package(
         .target(
             name: "Mailgun",
             dependencies: [
-                "Vapor"
+                .product(name: "Vapor", package: "vapor"),
             ]),
         .testTarget(
             name: "MailgunTests",
-            dependencies: ["Mailgun"]),
+            dependencies: [
+                .target(name: "Mailgun"),
+        ]),
     ]
 )
