@@ -1,7 +1,7 @@
 import Vapor
 
 extension MailgunClient {
-    func parse(response: ClientResponse) throws -> ClientResponse {
+    func parse(response: HTTPClient.Response) throws -> HTTPClient.Response {
         switch true {
         case response.status == .ok:
             return response

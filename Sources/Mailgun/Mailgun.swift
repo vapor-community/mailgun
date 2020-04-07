@@ -3,35 +3,39 @@ import Foundation
 
 // MARK: - Service
 public protocol MailgunProvider {
-    func send(_ content: MailgunMessage) -> EventLoopFuture<ClientResponse>
-    func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse>
-    func setup(forwarding: MailgunRouteSetup) -> EventLoopFuture<ClientResponse>
-    func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<ClientResponse>
+    var eventLoop: EventLoop { get set }
     
-    func `for`(_ req: Request) -> Self
+    func send(_ content: MailgunMessage) -> EventLoopFuture<HTTPClient.Response>
+    func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<HTTPClient.Response>
+    func setup(forwarding: MailgunRouteSetup) -> EventLoopFuture<HTTPClient.Response>
+    func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<HTTPClient.Response>
+}
+
+extension MailgunProvider {
+    public func hopped(to eventLoop: EventLoop) -> MailgunProvider {
+        var copy = self
+        copy.eventLoop = eventLoop
+        return copy
+    }
 }
 
 public struct MailgunClient: MailgunProvider {
+    public var eventLoop: EventLoop
     let config: MailgunConfiguration
-    let eventLoop: EventLoop
-    let client: Client
-    var domain: MailgunDomain
+    let client: HTTPClient
+    let domain: MailgunDomain
     
     // MARK: Initialization
     public init(
         config: MailgunConfiguration,
         eventLoop: EventLoop,
-        client: Client,
+        client: HTTPClient,
         domain: MailgunDomain
     ) {
         self.config = config
         self.eventLoop = eventLoop
         self.client = client
         self.domain = domain
-    }
-    
-    public func `for`(_ req: Request) -> MailgunClient {
-        return MailgunClient(config: config, eventLoop: req.eventLoop, client: req.client, domain: domain)
     }
 }
 
@@ -52,7 +56,7 @@ extension MailgunClient {
     ///   - content: Message
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: MailgunMessage) -> EventLoopFuture<ClientResponse> {
+    public func send(_ content: MailgunMessage) -> EventLoopFuture<HTTPClient.Response> {
         postRequest(content, endpoint: "messages")
     }
 
@@ -62,7 +66,7 @@ extension MailgunClient {
     ///   - content: TemplateMessage
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse> {
+    public func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<HTTPClient.Response> {
         postRequest(content, endpoint: "messages")
     }
     
@@ -72,7 +76,7 @@ extension MailgunClient {
     ///   - setup: RouteSetup
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func setup(forwarding setup: MailgunRouteSetup) -> EventLoopFuture<ClientResponse> {
+    public func setup(forwarding setup: MailgunRouteSetup) -> EventLoopFuture<HTTPClient.Response> {
         postRequest(setup, endpoint: "v3/routes")
     }
 
@@ -82,7 +86,7 @@ extension MailgunClient {
     ///   - template: Template
     ///   - container: Container
     /// - Returns: Future<Response>
-    public func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<ClientResponse> {
+    public func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<HTTPClient.Response> {
         postRequest(template, endpoint: "templates")
     }
 }

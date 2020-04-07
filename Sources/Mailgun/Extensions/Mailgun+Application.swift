@@ -3,6 +3,7 @@ import Vapor
 extension Application {
     public struct Mailgun {
         public typealias MailgunFactory = (Application, MailgunDomain?) -> MailgunProvider
+        
         public struct Provider {
             public static var real: Self {
                 .init {
@@ -26,7 +27,7 @@ extension Application {
                         return MailgunClient(
                             config: config,
                             eventLoop: app.eventLoopGroup.next(),
-                            client: app.client,
+                            client: app.client.http,
                             domain: useDomain
                         )
                     }
@@ -86,11 +87,11 @@ extension Application {
         }
         
         public func client(_ domain: MailgunDomain? = nil) -> MailgunProvider {
-            guard let make = storage.makeClient else {
+            guard let makeClient = storage.makeClient else {
                 fatalError("Mailgun not configured, use: app.mailgun.use(.real)")
             }
             
-            return make(app, domain)
+            return makeClient(app, domain)
         }
     }
     
