@@ -1,6 +1,6 @@
 import Vapor
 
-extension Mailgun {
+extension MailgunClient {
     func parse(response: ClientResponse) throws -> ClientResponse {
         switch true {
         case response.status == .ok:
