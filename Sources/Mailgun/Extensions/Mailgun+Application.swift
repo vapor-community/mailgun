@@ -27,7 +27,7 @@ extension Application {
                         return MailgunClient(
                             config: config,
                             eventLoop: app.eventLoopGroup.next(),
-                            client: app.http.client.shared,
+                            client: app.client,
                             domain: useDomain
                         )
                     }

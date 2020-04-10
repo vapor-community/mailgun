@@ -14,7 +14,7 @@ public enum MailgunError: Error {
     case unableToCreateTemplate(MailgunErrorResponse)
 
     /// Generic error
-    case unknownError(HTTPClient.Response)
+    case unknownError(ClientResponse)
     
     /// Identifier
     public var identifier: String {
