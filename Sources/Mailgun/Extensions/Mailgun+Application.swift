@@ -5,7 +5,7 @@ extension Application {
         public typealias MailgunFactory = (Application, MailgunDomain?) -> MailgunProvider
         
         public struct Provider {
-            public static var real: Self {
+            public static var live: Self {
                 .init {
                     $0.mailgun.use { app, domain in
                         guard let config = app.mailgun.configuration else {
@@ -73,7 +73,7 @@ extension Application {
         
         private func initialize() {
             app.storage[Key.self] = .init()
-            app.mailgun.use(.real)
+            app.mailgun.use(.live)
         }
         
         public var configuration: MailgunConfiguration? {
