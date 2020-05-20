@@ -15,7 +15,7 @@
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/twof/VaporMailgunService.git", from: "4.0.0-rc")
+.package(url: "https://github.com/vapor-community/VaporMailgunService.git", from: "4.0.0-rc")
 
 .target(name: "App", dependencies: [
     .product(name: "Vapor", package: "vapor"),
