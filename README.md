@@ -1,4 +1,4 @@
-# Vapor Mailgun Service
+# Mailgun
 
 [![Discord](https://img.shields.io/badge/join-discord-745EAF.svg?style=flat)](https://vapor.team)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%2010.15%20|%20Ubuntu%2016.04%20LTS-ff0000.svg?style=flat)](http://cocoapods.org/pods/FASwift)
@@ -12,7 +12,7 @@
 
 
 ## Installation
-Vapor Mailgun Service can be installed with Swift Package Manager
+Mailgun can be installed with Swift Package Manager
 
 ```swift
 .package(url: "https://github.com/vapor-community/mailgun.git", from: "5.0.0")
