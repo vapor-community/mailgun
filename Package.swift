@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "VaporMailgunService",
+    name: "mailgun",
     platforms: [
        .macOS(.v10_15)
     ],
