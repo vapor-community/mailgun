@@ -15,11 +15,11 @@
 Vapor Mailgun Service can be installed with Swift Package Manager
 
 ```swift
-.package(url: "https://github.com/vapor-community/VaporMailgunService.git", from: "4.0.0")
+.package(url: "https://github.com/vapor-community/mailgun.git", from: "5.0.0")
 
 .target(name: "App", dependencies: [
     .product(name: "Vapor", package: "vapor"),
-    .product(name: "Mailgun", package: "VaporMailgunService")
+    .product(name: "Mailgun", package: "mailgun")
 ])
 ```
 
