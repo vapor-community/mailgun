@@ -2,36 +2,42 @@ import Vapor
 import Foundation
 
 // MARK: - Service
-
 public protocol MailgunProvider {
-    func send(_ content: MailgunMessage) throws -> EventLoopFuture<ClientResponse>
-    func send(_ content: MailgunTemplateMessage) throws -> EventLoopFuture<ClientResponse>
-    func setup(forwarding: MailgunRouteSetup) throws -> EventLoopFuture<ClientResponse>
-    func createTemplate(_ template: MailgunTemplate) throws -> EventLoopFuture<ClientResponse>
+    func send(_ content: MailgunMessage) -> EventLoopFuture<ClientResponse>
+    func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse>
+    func setup(forwarding: MailgunRouteSetup) -> EventLoopFuture<ClientResponse>
+    func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<ClientResponse>
+    
+    func delegating(to eventLoop: EventLoop) -> MailgunProvider
 }
 
-internal protocol _MailgunProvider: MailgunProvider {
-    var application: Application { get }
-    var storage: MailgunStorage { get }
-}
-
-public struct Mailgun: _MailgunProvider {
-    let application: Application
+public struct MailgunClient: MailgunProvider {
+    let eventLoop: EventLoop
+    let config: MailgunConfiguration
     let domain: MailgunDomain
-    let storage: MailgunStorage
+    let client: Client
     
     // MARK: Initialization
-    
-    public init (_ application: Application, _ domain: MailgunDomain) {
-        self.application = application
+    public init(
+        config: MailgunConfiguration,
+        eventLoop: EventLoop,
+        client: Client,
+        domain: MailgunDomain
+    ) {
+        self.config = config
+        self.eventLoop = eventLoop
+        self.client = client
         self.domain = domain
-        self.storage = MailgunStorage(application)
     }
+    
+    public func delegating(to eventLoop: EventLoop) -> MailgunProvider {
+        MailgunClient(config: config, eventLoop: eventLoop, client: client.delegating(to: eventLoop), domain: domain)
+      }
 }
 
 // MARK: - Send message
 
-extension Mailgun {
+extension MailgunClient {
     /// Base API URL based on the current region
     var baseApiUrl: String {
         switch domain.region {

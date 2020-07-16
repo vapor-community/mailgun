@@ -1,23 +1,22 @@
 import Vapor
+import AsyncHTTPClient
 
-extension Mailgun {
+extension MailgunClient {
     func postRequest<Message: Content>(_ content: Message, endpoint: String) -> EventLoopFuture<ClientResponse> {
-        guard let configuration = self.storage.configuration else {
-            fatalError("Mailgun not configured. Use app.mailgun.configuration = ...")
-        }
-        
-        return application.eventLoopGroup.future().flatMapThrowing { _ -> HTTPHeaders in
-            let authKeyEncoded = try self.encode(apiKey: configuration.apiKey)
+        do {
+            let authKeyEncoded = try self.encode(apiKey: config.apiKey)
             var headers = HTTPHeaders()
             headers.add(name: .authorization, value: "Basic \(authKeyEncoded)")
-            return headers
-        }.flatMap { headers in
+
             let mailgunURI = URI(string: "\(self.baseApiUrl)/\(self.domain.domain)/\(endpoint)")
-            return self.application.client.post(mailgunURI, headers: headers) { req in
+            
+            return self.client.post(mailgunURI, headers: headers, beforeSend: { req in
                 try req.content.encode(content)
-            }.flatMapThrowing {
+            }).flatMapThrowing {
                 try self.parse(response: $0)
             }
+        } catch {
+            return eventLoop.makeFailedFuture(error)
         }
     }
 }
