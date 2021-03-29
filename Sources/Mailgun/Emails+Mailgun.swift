@@ -1,0 +1,17 @@
+import Vapor
+import Email
+import MailgunKit
+
+extension Application.Emails.Provider {
+    static func mailgun(_ configuration: Mailgun.Configuration) -> Self {
+        .init { app in
+            app.emails.use {
+                LiveMailgunClient(
+                    config: configuration,
+                    eventLoop: $0.eventLoopGroup.next(),
+                    httpClient: $0.http.client.shared
+                )
+            }
+        }
+    }
+}
