@@ -9,7 +9,8 @@ extension Application.Emails.Provider {
                 LiveMailgunClient(
                     config: configuration,
                     eventLoop: $0.eventLoopGroup.next(),
-                    httpClient: $0.http.client.shared
+                    httpClient: $0.http.client.shared,
+                    logger: $0.logger
                 )
             }
         }

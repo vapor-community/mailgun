@@ -24,11 +24,14 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Email", package: "email"),
                 .product(name: "MailgunKit", package: "mailgun-kit"),
-            ]),
+            ]
+        ),
         .testTarget(
             name: "MailgunTests",
             dependencies: [
                 .target(name: "Mailgun"),
-        ]),
+                .product(name: "XCTVapor", package: "vapor"),
+            ]
+        ),
     ]
 )
