@@ -3,7 +3,7 @@ import Email
 import MailgunKit
 
 extension Application.Emails.Provider {
-    static func mailgun(_ configuration: Mailgun.Configuration) -> Self {
+    public static func mailgun(_ configuration: Mailgun.Configuration) -> Self {
         .init { app in
             app.emails.use {
                 LiveMailgunClient(

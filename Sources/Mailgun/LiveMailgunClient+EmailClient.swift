@@ -3,7 +3,7 @@ import MailgunKit
 import Email
 import NIO
 
-enum VaporMailgunError: Error {
+public enum VaporMailgunError: Error {
     case failedToSendAttachment(Vapor.File)
 }
 
