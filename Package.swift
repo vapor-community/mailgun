@@ -14,8 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
-        .package(url: "https://github.com/vapor-community/mailgun-kit.git", from: "1.0.0"),
-        .package(url: "https://github.com/vapor/email.git", from: "1.0.0"),
+        .package(url: "https://github.com/vapor-community/mailgun-kit.git", .branch("v1")),
+        .package(url: "https://github.com/vapor/email.git", .branch("api")),
     ],
     targets: [
         .target(
