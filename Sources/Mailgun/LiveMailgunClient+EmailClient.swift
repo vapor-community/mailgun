@@ -1,26 +1,79 @@
+import Vapor
 import MailgunKit
 import Email
 import NIO
 
+enum VaporMailgunError: Error {
+    case failedToSendAttachment(Vapor.File)
+}
+
 extension LiveMailgunClient: EmailClient {
-    #warning("todo: attachments")
     public func send(_ messages: [EmailMessage]) -> EventLoopFuture<Void> {
-        messages.map { message in
-            Mailgun.Message(
-                from: message.from.fullAddress,
-                to: message.to.map(\.mailgun),
-                replyTo: message.replyTo?.fullAddress,
-                cc: message.cc?.map(\.mailgun),
-                bcc: message.bcc?.map(\.mailgun),
-                subject: message.subject,
-                text: message.content.text ?? "",
-                html: message.content.html,
-                attachments: [],
-                inline: []
-            )
+        do {
+            return try messages.map { message -> Mailgun.Message in
+                let html: String?
+                let text: String?
+                
+                switch message.content {
+                case let .text(_text):
+                    text = _text
+                    html = nil
+                case let .html(_html):
+                    html = _html
+                    text = nil
+                case let .universal(_text, _html):
+                    text = _text
+                    html = _html
+                }
+                
+                return Mailgun.Message(
+                    from: message.from.fullAddress,
+                    to: message.to.map(\.mailgun),
+                    replyTo: message.replyTo?.fullAddress,
+                    cc: message.cc?.map(\.mailgun),
+                    bcc: message.bcc?.map(\.mailgun),
+                    subject: message.subject,
+                    text: text ?? "",
+                    html: html,
+                    attachments: try message.attachments?.toMailgunAttachments(),
+                    inline: try message.attachments?.toMailgunInlineAttachments()
+                )
+            }
+            .map { self.sendRequest(.send($0)).transform(to: ()) }
+            .flatten(on: self.eventLoop)
+        } catch {
+            return self.eventLoop.future(error: error)
         }
-        .map { self.sendRequest(.send($0)).transform(to: ()) }
-        .flatten(on: self.eventLoop)
+    }
+}
+
+extension Collection where Element == EmailAttachment {
+    func toMailgunAttachments() throws -> [Mailgun.File] {
+        try self.reduce(into: []) { result, attachment in
+            guard case let .attachment(file) = attachment else { return }
+            return try result.append(file.toMailgunFile())
+        }
+    }
+    
+    func toMailgunInlineAttachments() throws -> [Mailgun.File] {
+        try self.reduce(into: []) { result, attachment in
+            guard case let .inline(file) = attachment else { return }
+            return try result.append(file.toMailgunFile())
+        }
+    }
+}
+
+extension Vapor.File {
+    func toMailgunFile() throws -> Mailgun.File {
+        guard let contentType = self.contentType?.serialize() else {
+            throw VaporMailgunError.failedToSendAttachment(self)
+        }
+        
+        return .init(
+            data: self.data,
+            filename: self.filename,
+            contentType: contentType
+        )
     }
 }
 
