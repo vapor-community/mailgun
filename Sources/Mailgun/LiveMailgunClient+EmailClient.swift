@@ -27,9 +27,9 @@ extension LiveMailgunClient: EmailClient {
                 }
                 
                 let attachments = try message.attachments?.toMailgunAttachments() ?? []
-                let inline = try message.attachments?.toMailgunInlineAttachments() ?? []
+                let inlines = try message.attachments?.toMailgunInlineAttachments() ?? []
                 
-                if attachments.count > 1 || inline.count > 1 {
+                if attachments.count > 1 || inlines.count > 1 {
                     self.logger.warning("Vapor emails for Mailgun does not support multiple attachments, due to limitations with multipart implementation!")
                 }
                 
@@ -42,8 +42,8 @@ extension LiveMailgunClient: EmailClient {
                     subject: message.subject,
                     text: text ?? "",
                     html: html,
-                    attachments: try message.attachments?.toMailgunAttachments().first,
-                    inline: try message.attachments?.toMailgunInlineAttachments().first
+                    attachments: attachments.first,
+                    inline: inlines.first
                 )
             }
             .map { self.sendRequest(.send($0)).transform(to: ()) }
