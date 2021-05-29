@@ -67,5 +67,34 @@ public struct MailgunMessage: Content {
         self.attachment = attachments
         self.inline = inline
     }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(from, forKey: .from)
+        try container.encode(to, forKey: .to)
+        try container.encode(subject, forKey: .subject)
+        try container.encode(text, forKey: .text)
+        
+        if let replyTo = self.replyTo {
+            try container.encode(replyTo, forKey: .replyTo)
+        }
+        if let cc = self.cc {
+            try container.encode(cc, forKey: .cc)
+        }
+        if let bcc = self.bcc {
+            try container.encode(bcc, forKey: .bcc)
+        }
+        if let html = self.html {
+            try container.encode(html, forKey: .html)
+        }
+        if let inline = self.inline {
+            try container.encode(inline, forKey: .inline)
+        }
+        if let attachments = self.attachment {
+            try attachments.forEach { attachment in
+                try container.encode(attachment, forKey: .attachment)
+            }
+        }
+    }
 }
 
