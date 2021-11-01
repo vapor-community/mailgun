@@ -8,7 +8,7 @@ final class MailgunTests: XCTestCase {
         let app = Application(.testing)
         defer { app.shutdown() }
         
-        let domain = Mailgun.Domain("", .us)
+        let domain = Mailgun.Domain("", .eu)
         let config = Mailgun.Configuration(apiKey: "", defaultDomain: domain)
         app.emails.use(.mailgun(config))
         
@@ -20,7 +20,7 @@ final class MailgunTests: XCTestCase {
             content: .html("<h1>Hey mads!</h2>"),
             attachments: [
                 .attachment(File.init(data: "this is a text file", filename: "test.txt")),
-                .attachment(File.init(data: "this is a text file", filename: "test.txt"))
+                .attachment(File.init(data: "this is a text file2", filename: "test2.txt"))
             ]
         )
         try app.email.send(message).wait()
