@@ -2,9 +2,9 @@ import Vapor
 
 public struct MailgunMessage: Content {
     public static var defaultContentType: HTTPMediaType = .formData
-    
+
     public typealias FullEmail = (email: String, name: String?)
-    
+
     public let from: String
     public let to: String
     public let replyTo: String?
@@ -15,7 +15,8 @@ public struct MailgunMessage: Content {
     public let html: String?
     public let attachment: [File]?
     public let inline: [File]?
-    
+    public let tags: [String]?
+
     private enum CodingKeys: String, CodingKey {
         case from
         case to
@@ -27,9 +28,10 @@ public struct MailgunMessage: Content {
         case html
         case attachment
         case inline
+        case tags = "o:tag"
     }
-    
-    public init(from: String, to: String, replyTo: String? = nil, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil) {
+
+    public init(from: String, to: String, replyTo: String? = nil, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
         self.from = from
         self.to = to
         self.replyTo = replyTo
@@ -40,9 +42,10 @@ public struct MailgunMessage: Content {
         self.html = html
         self.attachment = attachments
         self.inline = inline
+        self.tags = tags
     }
-    
-    public init(from: String, to: [String], replyTo: String? = nil, cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil) {
+
+    public init(from: String, to: [String], replyTo: String? = nil, cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
         self.from = from
         self.to = to.joined(separator: ",")
         self.replyTo = replyTo
@@ -53,9 +56,10 @@ public struct MailgunMessage: Content {
         self.html = html
         self.attachment = attachments
         self.inline = inline
+        self.tags = tags
     }
-    
-    public init(from: String, to: [FullEmail], replyTo: String? = nil, cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil) {
+
+    public init(from: String, to: [FullEmail], replyTo: String? = nil, cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
         self.from = from
         self.to = to.stringArray.joined(separator: ",")
         self.replyTo = replyTo
@@ -66,6 +70,7 @@ public struct MailgunMessage: Content {
         self.html = html
         self.attachment = attachments
         self.inline = inline
+        self.tags = tags
     }
 }
 
