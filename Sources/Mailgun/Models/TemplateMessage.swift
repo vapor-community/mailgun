@@ -39,6 +39,7 @@ public struct MailgunTemplateMessage: Content {
         try container.encode(to, forKey: .to)
         try container.encode(cc, forKey: .cc)
         try container.encode(bcc, forKey: .bcc)
+        try container.encode(replyTo, forKey: .replyTo)
         try container.encode(subject, forKey: .subject)
         try container.encode(template, forKey: .template)
         if let templateData = templateData {
