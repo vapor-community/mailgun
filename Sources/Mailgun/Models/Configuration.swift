@@ -18,7 +18,7 @@ public struct MailgunConfiguration {
     /// - MAILGUN_API_KEY
     public static var environment: MailgunConfiguration {
         guard let apiKey = Environment.get("MAILGUN_API_KEY") else {
-            fatalError("Mailgun environmant variables not set")
+            fatalError("Mailgun environment variables not set")
         }
         return .init(apiKey: apiKey)
     }
