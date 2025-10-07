@@ -113,10 +113,7 @@ public struct MailgunMessage: Content {
 extension Array where Element == MailgunMessage.FullEmail {
     var stringArray: [String] {
         self.map { entry in
-            guard let name = entry.name else {
-                return entry.email
-            }
-            return "\"\(name) <\(entry.email)>\""
+            entry.name.map { #""\#($0) <\#(entry.email)>""# } ?? entry.email
         }
     }
 }
