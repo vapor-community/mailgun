@@ -1,5 +1,5 @@
 import Foundation
-import Vapor
+public import Vapor
 
 // MARK: - Service
 public protocol MailgunProvider: Sendable {
@@ -12,7 +12,7 @@ public protocol MailgunProvider: Sendable {
 public struct MailgunClient: MailgunProvider {
     let apiKey: String
     let domain: MailgunDomain
-    let client: Client
+    let client: any Client
 }
 
 // MARK: - Send message

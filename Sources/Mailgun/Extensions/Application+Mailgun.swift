@@ -1,9 +1,9 @@
 import Synchronization
-import Vapor
+public import Vapor
 
 extension Application {
     public struct Mailgun {
-        public typealias MailgunFactory = @Sendable (Application, MailgunDomain?) -> MailgunProvider
+        public typealias MailgunFactory = @Sendable (Application, MailgunDomain?) -> any MailgunProvider
 
         public struct Provider {
             public static var live: Self {
@@ -91,7 +91,7 @@ extension Application {
             nonmutating set { storage.configuration = newValue }
         }
 
-        public func client(_ domain: MailgunDomain? = nil) -> MailgunProvider {
+        public func client(_ domain: MailgunDomain? = nil) -> any MailgunProvider {
             guard let makeClient = storage.makeClient else {
                 fatalError("Mailgun not configured, use: app.mailgun.use(.real)")
             }

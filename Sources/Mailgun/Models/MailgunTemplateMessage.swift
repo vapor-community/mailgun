@@ -1,7 +1,7 @@
-import Vapor
+public import Vapor
 
 public struct MailgunTemplateMessage: Content {
-    public static let defaultContentType: HTTPMediaType { .formData }
+    public static var defaultContentType: HTTPMediaType { .formData }
 
     public typealias FullEmail = (email: String, name: String?)
 
@@ -33,7 +33,7 @@ public struct MailgunTemplateMessage: Content {
         case templateText = "t:text"
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(from, forKey: .from)
         try container.encode(to, forKey: .to)
@@ -43,9 +43,10 @@ public struct MailgunTemplateMessage: Content {
         try container.encode(subject, forKey: .subject)
         try container.encode(template, forKey: .template)
         if let templateData = templateData {
-            guard let jsonData = try? JSONEncoder().encode(templateData),
-                let jsonString = String(decoding: jsonData, as: UTF8.self)
-            else { throw MailgunError.encodingProblem }
+            guard let jsonData = try? JSONEncoder().encode(templateData) else {
+                throw MailgunError.encodingProblem
+            }
+            let jsonString = String(decoding: jsonData, as: UTF8.self)
             try container.encode(jsonString, forKey: .templateData)
         }
         try container.encode(templateVersion, forKey: .templateVersion)
