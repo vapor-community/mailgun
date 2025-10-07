@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 public struct MailgunMessage: Content {
     public static var defaultContentType: HTTPMediaType { .formData }

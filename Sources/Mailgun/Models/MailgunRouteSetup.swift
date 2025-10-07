@@ -1,5 +1,5 @@
 import Foundation
-import Vapor
+public import Vapor
 
 public struct MailgunRouteSetup: Content {
     public static var defaultContentType: HTTPMediaType { .urlEncodedForm }

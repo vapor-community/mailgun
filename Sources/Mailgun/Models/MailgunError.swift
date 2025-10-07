@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 /// Mailgun error type.
 public struct MailgunError: Error, Sendable, Equatable {

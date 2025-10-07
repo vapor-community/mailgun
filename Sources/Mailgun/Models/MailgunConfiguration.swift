@@ -1,4 +1,4 @@
-import Configuration
+public import Configuration
 import Vapor
 
 public struct MailgunConfiguration: Sendable {
