@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://avatars.githubusercontent.com/u/26165732?s=200&v=4" width="100" height="100" alt="avatar" />
+    <img src="https://avatars.githubusercontent.com/u/26165732?s=200&v=4" width="100" height="100" alt="avatar">
     <h1>Mailgun</h1>
     <a href="https://swiftpackageindex.com/vapor-community/mailgun/documentation">
         <img src="https://design.vapor.codes/images/readthedocs.svg" alt="Documentation">
