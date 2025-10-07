@@ -2,7 +2,7 @@ import Vapor
 
 public struct MailgunIncomingMessage: Content {
     public static let defaultContentType: HTTPMediaType = .formData
-    
+
     public let recipient: String
     public let sender: String
     public let from: String
@@ -15,7 +15,7 @@ public struct MailgunIncomingMessage: Content {
     public let messageHeaders: String
     public let contentIdMap: String
     public let attachments: [File]
-    
+
     enum CodingKeys: String, CodingKey {
         case recipient
         case sender
@@ -30,25 +30,25 @@ public struct MailgunIncomingMessage: Content {
         case contentIdMap = "content-id-map"
         case attachments
     }
-    
+
     struct DynamicAttachmentKey: CodingKey {
         var stringValue: String
-        
+
         init?(stringValue: String) {
             guard stringValue.hasPrefix("attachment-") else { return nil }
             guard let lastKey = stringValue.components(separatedBy: "-").last,
-                let _ = Int(lastKey)
-                else { return nil}
+                Int(lastKey) != nil
+            else { return nil }
             self.stringValue = stringValue
         }
-        
+
         var intValue: Int?
-        
+
         init?(intValue: Int) {
             return nil
         }
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         recipient = try container.decode(String.self, forKey: .recipient)
@@ -78,7 +78,7 @@ extension MailgunIncomingMessage {
         public let url: String
         public let name: String
         public let contentType: String
-        
+
         enum CodingKeys: String, CodingKey {
             case size
             case url

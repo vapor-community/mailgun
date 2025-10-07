@@ -4,7 +4,7 @@ import Vapor
 public struct MailgunConfiguration: Sendable {
     /// API key (including "key-" prefix)
     public let apiKey: String
-    
+
     /// Initializer
     ///
     /// - Parameters:
@@ -13,7 +13,7 @@ public struct MailgunConfiguration: Sendable {
     public init(apiKey: String) {
         self.apiKey = apiKey
     }
-    
+
     /// It will try to initialize configuration with environment variables:
     /// - MAILGUN_API_KEY
     public static var environment: MailgunConfiguration {

@@ -6,7 +6,7 @@ extension Request {
     public func mailgun() -> MailgunProvider {
         application.mailgun().delegating(to: self.eventLoop)
     }
-    
+
     /// Mailgun with selected domain.
     public func mailgun(_ domain: MailgunDomain) -> MailgunProvider {
         application.mailgun(domain).delegating(to: self.eventLoop)

@@ -3,10 +3,10 @@ import Vapor
 public enum MailgunError: Error {
     /// Encoding problem
     case encodingProblem
-    
+
     /// Failed authentication
     case authenticationFailed
-    
+
     /// Failed to send email (with error message)
     case unableToSendEmail(MailgunErrorResponse)
 
@@ -15,7 +15,7 @@ public enum MailgunError: Error {
 
     /// Generic error
     case unknownError(ClientResponse)
-    
+
     /// Identifier
     public var identifier: String {
         switch self {
@@ -31,7 +31,7 @@ public enum MailgunError: Error {
             return "mailgun.unknown_error"
         }
     }
-    
+
     /// Reason
     public var reason: String {
         switch self {

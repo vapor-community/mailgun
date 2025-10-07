@@ -1,5 +1,5 @@
-import Vapor
 import Foundation
+import Vapor
 
 // MARK: - Service
 public protocol MailgunProvider: Sendable {
@@ -7,7 +7,7 @@ public protocol MailgunProvider: Sendable {
     func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse>
     func setup(forwarding: MailgunRouteSetup) -> EventLoopFuture<ClientResponse>
     func createTemplate(_ template: MailgunTemplate) -> EventLoopFuture<ClientResponse>
-    
+
     func delegating(to eventLoop: EventLoop) -> MailgunProvider
 }
 
@@ -16,7 +16,7 @@ public struct MailgunClient: MailgunProvider {
     let config: MailgunConfiguration
     let domain: MailgunDomain
     let client: Client
-    
+
     // MARK: Initialization
     public init(
         config: MailgunConfiguration,
@@ -29,10 +29,10 @@ public struct MailgunClient: MailgunProvider {
         self.client = client
         self.domain = domain
     }
-    
+
     public func delegating(to eventLoop: EventLoop) -> MailgunProvider {
         MailgunClient(config: config, eventLoop: eventLoop, client: client.delegating(to: eventLoop), domain: domain)
-      }
+    }
 }
 
 // MARK: - Send message
@@ -45,7 +45,7 @@ extension MailgunClient {
         case .eu: return "https://api.eu.mailgun.net/v3"
         }
     }
-    
+
     /// Send message
     ///
     /// - Parameters:
@@ -65,7 +65,7 @@ extension MailgunClient {
     public func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse> {
         postRequest(content, endpoint: "messages")
     }
-    
+
     /// Setup forwarding
     ///
     /// - Parameters:
