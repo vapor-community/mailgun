@@ -14,19 +14,14 @@ extension Application {
                         }
 
                         let useDomain: MailgunDomain
-
-                        if let domain = domain {
+                        if let domain {
                             useDomain = domain
                         } else {
-                            guard let defaultDomain = app.mailgun.defaultDomain else {
-                                fatalError("Mailgun default domain not configured, use: app.mailgun.defaultDomain = .init()")
-                            }
-
-                            useDomain = defaultDomain
+                            useDomain = config.defaultDomain
                         }
 
                         return MailgunClient(
-                            config: config,
+                            apiKey: config.apiKey,
                             domain: useDomain,
                             client: app.client
                         )
@@ -45,17 +40,11 @@ extension Application {
 
         private final class Storage: Sendable {
             private struct SendableBox: Sendable {
-                var defaultDomain: MailgunDomain?
                 var configuration: MailgunConfiguration?
                 var makeClient: MailgunFactory?
             }
 
             private let sendableBox: Mutex<SendableBox>
-
-            var defaultDomain: MailgunDomain? {
-                get { sendableBox.withLock { $0.defaultDomain } }
-                set { sendableBox.withLock { $0.defaultDomain = newValue } }
-            }
 
             var configuration: MailgunConfiguration? {
                 get { sendableBox.withLock { $0.configuration } }
@@ -100,11 +89,6 @@ extension Application {
         public var configuration: MailgunConfiguration? {
             get { storage.configuration }
             nonmutating set { storage.configuration = newValue }
-        }
-
-        public var defaultDomain: MailgunDomain? {
-            get { storage.defaultDomain }
-            nonmutating set { storage.defaultDomain = newValue }
         }
 
         public func client(_ domain: MailgunDomain? = nil) -> MailgunProvider {

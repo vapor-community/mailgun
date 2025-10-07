@@ -3,7 +3,7 @@ import Vapor
 
 extension MailgunClient {
     func postRequest<Message: Content>(_ content: Message, endpoint: String) async throws -> ClientResponse {
-        let authKeyEncoded = try self.encode(apiKey: config.apiKey)
+        let authKeyEncoded = try self.encode(apiKey: self.apiKey)
         var headers = HTTPHeaders()
         headers.add(name: .authorization, value: "Basic \(authKeyEncoded)")
 

@@ -1,3 +1,4 @@
+import Configuration
 import Mailgun
 import Testing
 import VaporTesting
@@ -5,8 +6,12 @@ import VaporTesting
 @Suite("Mailgun Tests")
 struct MailgunTests {
     private func configure(_ app: Application) async throws {
-        app.mailgun.configuration = .init(apiKey: "test-api-key")
-        app.mailgun.defaultDomain = .init("mg.myapp1.com", .us)
+        let config = ConfigReader(providers: [
+            EnvironmentVariablesProvider(),
+            try await JSONProvider(filePath: "testing.config.json")
+        ])
+        app.mailgun.configuration = try .init(config: config)
+        #expect(app.mailgun.configuration?.apiKey == "test-api-key")
     }
 
     let message = MailgunMessage(
