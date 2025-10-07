@@ -1,5 +1,5 @@
-import Vapor
 import AsyncHTTPClient
+import Vapor
 
 extension MailgunClient {
     func postRequest<Message: Content>(_ content: Message, endpoint: String) -> EventLoopFuture<ClientResponse> {
@@ -9,10 +9,13 @@ extension MailgunClient {
             headers.add(name: .authorization, value: "Basic \(authKeyEncoded)")
 
             let mailgunURI = URI(string: "\(self.baseApiUrl)/\(self.domain.domain)/\(endpoint)")
-            
-            return self.client.post(mailgunURI, headers: headers, beforeSend: { req in
-                try req.content.encode(content)
-            }).flatMapThrowing {
+
+            return self.client.post(
+                mailgunURI, headers: headers,
+                beforeSend: { req in
+                    try req.content.encode(content)
+                }
+            ).flatMapThrowing {
                 try self.parse(response: $0)
             }
         } catch {
