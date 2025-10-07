@@ -2,7 +2,7 @@ import Vapor
 import Foundation
 
 // MARK: - Service
-public protocol MailgunProvider {
+public protocol MailgunProvider: Sendable {
     func send(_ content: MailgunMessage) -> EventLoopFuture<ClientResponse>
     func send(_ content: MailgunTemplateMessage) -> EventLoopFuture<ClientResponse>
     func setup(forwarding: MailgunRouteSetup) -> EventLoopFuture<ClientResponse>

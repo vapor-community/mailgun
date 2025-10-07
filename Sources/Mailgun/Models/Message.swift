@@ -1,7 +1,7 @@
 import Vapor
 
 public struct MailgunMessage: Content {
-    public static var defaultContentType: HTTPMediaType = .formData
+    public static let defaultContentType: HTTPMediaType = .formData
 
     public typealias FullEmail = (email: String, name: String?)
 

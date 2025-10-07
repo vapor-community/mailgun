@@ -1,7 +1,7 @@
 import Foundation
 import Vapor
 
-public struct MailgunConfiguration {
+public struct MailgunConfiguration: Sendable {
     /// API key (including "key-" prefix)
     public let apiKey: String
     

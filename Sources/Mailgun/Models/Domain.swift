@@ -1,4 +1,4 @@
-public struct MailgunDomain {
+public struct MailgunDomain: Sendable {
     public let domain: String
     public let region: MailgunRegion
     
