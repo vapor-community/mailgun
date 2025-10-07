@@ -10,7 +10,7 @@ public protocol MailgunProvider: Sendable {
 }
 
 public struct MailgunClient: MailgunProvider {
-    let config: MailgunConfiguration
+    let apiKey: String
     let domain: MailgunDomain
     let client: Client
 }

@@ -10,13 +10,15 @@ let package = Package(
         .library(name: "Mailgun", targets: ["Mailgun"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.117.0")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.117.0"),
+        .package(url: "https://github.com/apple/swift-configuration.git", from: "0.1.1"),
     ],
     targets: [
         .target(
             name: "Mailgun",
             dependencies: [
-                .product(name: "Vapor", package: "vapor")
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "Configuration", package: "swift-configuration"),
             ]
         ),
         .testTarget(
@@ -24,6 +26,7 @@ let package = Package(
             dependencies: [
                 .target(name: "Mailgun"),
                 .product(name: "VaporTesting", package: "vapor"),
+                .product(name: "Configuration", package: "swift-configuration"),
             ]
         ),
     ]

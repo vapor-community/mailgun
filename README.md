@@ -25,27 +25,7 @@
 Sign up and set up a Mailgun account [here](https://www.mailgun.com/).
 Make sure you get an API key and register a custom domain.
 
-### Configure
-
-In `configure.swift`:
-
-```swift
-import Mailgun
-
-public func configure(_ app: Application) async throws {
-    // Either put into your environment variables the following keys:
-    // MAILGUN_API_KEY=...
-    app.mailgun.configuration = .environment
-
-    // or set it directly
-    app.mailgun.configuration = .init(apiKey: "<api key>")
-}
-```
-
-> Note: If your private API key begins with `key-`, be sure to include it
-
 ### Declare all your domains
-
 ```swift
 extension MailgunDomain {
     static var myApp1: MailgunDomain { .init("mg.myapp1.com", .us) }
@@ -55,11 +35,28 @@ extension MailgunDomain {
 }
 ```
 
-Set default domain in `configure.swift`
+### Configure
+
+In `configure.swift`:
 
 ```swift
-app.mailgun.defaultDomain = .myApp1
+import Configuration
+import Mailgun
+
+public func configure(_ app: Application) async throws {
+    // Either set it directly
+    app.mailgun.configuration = .init(apiKey: "<api key>", defaultDomain: .myApp1)
+
+    // Or use Swift Configuration to read from environment variables or config files
+    let config = ConfigReader(providers: [
+        EnvironmentVariablesProvider(),
+        try await JSONProvider(filePath: "mailgun.config.json")
+    ])
+    app.mailgun.configuration = try .init(config: config)
+}
 ```
+
+> Note: If your private API key begins with `key-`, be sure to include it
 
 ### Send emails
 
