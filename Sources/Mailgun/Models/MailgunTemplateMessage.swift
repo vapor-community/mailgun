@@ -43,7 +43,7 @@ public struct MailgunTemplateMessage: Content {
         try container.encode(template, forKey: .template)
         if let templateData = templateData {
             guard let jsonData = try? JSONEncoder().encode(templateData),
-                let jsonString = String(data: jsonData, encoding: .utf8)
+                let jsonString = String(decoding: jsonData, as: UTF8.self)
             else { throw MailgunError.encodingProblem }
             try container.encode(jsonString, forKey: .templateData)
         }
