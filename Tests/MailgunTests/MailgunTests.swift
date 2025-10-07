@@ -8,7 +8,7 @@ struct MailgunTests {
     private func configure(_ app: Application) async throws {
         let config = ConfigReader(providers: [
             EnvironmentVariablesProvider(),
-            try await JSONProvider(filePath: "testing.config.json")
+            try await JSONProvider(filePath: "testing.config.json"),
         ])
         app.mailgun.configuration = try .init(config: config)
         #expect(app.mailgun.configuration?.apiKey == "test-api-key")
