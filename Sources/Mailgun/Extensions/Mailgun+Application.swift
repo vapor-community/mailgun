@@ -1,8 +1,9 @@
+import Synchronization
 import Vapor
 
 extension Application {
     public struct Mailgun {
-        public typealias MailgunFactory = (Application, MailgunDomain?) -> MailgunProvider
+        public typealias MailgunFactory = @Sendable (Application, MailgunDomain?) -> MailgunProvider
         
         public struct Provider {
             public static var live: Self {
@@ -43,12 +44,33 @@ extension Application {
         
         let app: Application
         
-        private final class Storage {
-            var defaultDomain: MailgunDomain?
-            var configuration: MailgunConfiguration?
-            var makeClient: MailgunFactory?
+        private final class Storage: Sendable {
+            private struct SendableBox: Sendable {
+                var defaultDomain: MailgunDomain?
+                var configuration: MailgunConfiguration?
+                var makeClient: MailgunFactory?
+            }
+
+            private let sendableBox: Mutex<SendableBox>
+
+            var defaultDomain: MailgunDomain? {
+                get { sendableBox.withLock { $0.defaultDomain } }
+                set { sendableBox.withLock { $0.defaultDomain = newValue } }
+            }
+
+            var configuration: MailgunConfiguration? {
+                get { sendableBox.withLock { $0.configuration } }
+                set { sendableBox.withLock { $0.configuration = newValue } }
+            }
+
+            var makeClient: MailgunFactory? {
+                get { sendableBox.withLock { $0.makeClient } }
+                set { sendableBox.withLock { $0.makeClient = newValue } }
+            }
             
-            init() {}
+            init() {
+                self.sendableBox = .init(SendableBox())
+            }
         }
         
         private struct Key: StorageKey {

@@ -2,7 +2,7 @@ import Vapor
 import Foundation
 
 public struct MailgunRouteSetup: Content {
-    public static var defaultContentType: HTTPMediaType = .urlEncodedForm
+    public static let defaultContentType: HTTPMediaType = .urlEncodedForm
     
     public let priority: Int
     public let description: String
