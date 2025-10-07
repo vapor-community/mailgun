@@ -1,7 +1,7 @@
-import Vapor
+public import Vapor
 
 public struct MailgunMessage: Content {
-    public static var defaultContentType: HTTPMediaType = .formData
+    public static var defaultContentType: HTTPMediaType { .formData }
 
     public typealias FullEmail = (email: String, name: String?)
 
@@ -31,7 +31,19 @@ public struct MailgunMessage: Content {
         case tags = "o:tag"
     }
 
-    public init(from: String, to: String, replyTo: String? = nil, cc: String? = nil, bcc: String? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
+    public init(
+        from: String,
+        to: String,
+        replyTo: String? = nil,
+        cc: String? = nil,
+        bcc: String? = nil,
+        subject: String,
+        text: String,
+        html: String? = nil,
+        attachments: [File]? = nil,
+        inline: [File]? = nil,
+        tags: [String]? = nil
+    ) {
         self.from = from
         self.to = to
         self.replyTo = replyTo
@@ -45,7 +57,19 @@ public struct MailgunMessage: Content {
         self.tags = tags
     }
 
-    public init(from: String, to: [String], replyTo: String? = nil, cc: [String]? = nil, bcc: [String]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
+    public init(
+        from: String,
+        to: [String],
+        replyTo: String? = nil,
+        cc: [String]? = nil,
+        bcc: [String]? = nil,
+        subject: String,
+        text: String,
+        html: String? = nil,
+        attachments: [File]? = nil,
+        inline: [File]? = nil,
+        tags: [String]? = nil
+    ) {
         self.from = from
         self.to = to.joined(separator: ",")
         self.replyTo = replyTo
@@ -59,7 +83,19 @@ public struct MailgunMessage: Content {
         self.tags = tags
     }
 
-    public init(from: String, to: [FullEmail], replyTo: String? = nil, cc: [FullEmail]? = nil, bcc: [FullEmail]? = nil, subject: String, text: String, html: String? = nil, attachments: [File]? = nil, inline: [File]? = nil, tags: [String]? = nil) {
+    public init(
+        from: String,
+        to: [FullEmail],
+        replyTo: String? = nil,
+        cc: [FullEmail]? = nil,
+        bcc: [FullEmail]? = nil,
+        subject: String,
+        text: String,
+        html: String? = nil,
+        attachments: [File]? = nil,
+        inline: [File]? = nil,
+        tags: [String]? = nil
+    ) {
         self.from = from
         self.to = to.stringArray.joined(separator: ",")
         self.replyTo = replyTo
@@ -74,3 +110,10 @@ public struct MailgunMessage: Content {
     }
 }
 
+extension Array where Element == MailgunMessage.FullEmail {
+    var stringArray: [String] {
+        self.map { entry in
+            entry.name.map { #""\#($0) <\#(entry.email)>""# } ?? entry.email
+        }
+    }
+}

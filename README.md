@@ -1,57 +1,31 @@
-# Mailgun
+<div align="center">
+    <img src="https://avatars.githubusercontent.com/u/26165732?s=200&v=4" width="100" height="100" alt="avatar">
+    <h1>Mailgun</h1>
+    <a href="https://swiftpackageindex.com/vapor-community/mailgun/documentation">
+        <img src="https://design.vapor.codes/images/readthedocs.svg" alt="Documentation">
+    </a>
+    <a href="https://discord.gg/vapor"><img src="https://design.vapor.codes/images/discordchat.svg" alt="Team Chat"></a>
+    <a href="LICENSE"><img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License"></a>
+    <a href="https://github.com/vapor-community/mailgun/actions/workflows/test.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/vapor-community/mailgun/test.yml?event=push&style=plastic&logo=github&label=tests&logoColor=%23ccc" alt="Continuous Integration">
+    </a>
+    <a href="https://codecov.io/github/vapor-community/mailgun">
+        <img src="https://img.shields.io/codecov/c/github/vapor-community/mailgun?style=plastic&logo=codecov&label=codecov" alt="Code Coverage">
+    </a>
+    <a href="https://swift.org">
+        <img src="https://design.vapor.codes/images/swift61up.svg" alt="Swift 6.1+">
+    </a>
+</div>
+<br>
 
-[![Discord](https://img.shields.io/badge/join-discord-745EAF.svg?style=flat)](https://vapor.team)
-[![Platforms](https://img.shields.io/badge/platforms-macOS%2010.15%20|%20Ubuntu%2016.04%20LTS-ff0000.svg?style=flat)](http://cocoapods.org/pods/FASwift)
-[![Swift 5.2](https://img.shields.io/badge/swift-5.2-orange.svg?style=flat)](http://swift.org)
-[![Vapor 4](https://img.shields.io/badge/vapor-4.0-blue.svg?style=flat)](https://vapor.codes)
-
-##
-
-`Mailgun` is a Vapor 4 service for a popular [email sending API](https://www.mailgun.com/)
-> Note: Vapor3 version is available in `vapor3` branch and from `3.0.0` tag
-
-
-## Installation
-Mailgun can be installed with Swift Package Manager
-
-```swift
-.package(url: "https://github.com/vapor-community/mailgun.git", from: "5.0.0")
-
-.target(name: "App", dependencies: [
-    .product(name: "Vapor", package: "vapor"),
-    .product(name: "Mailgun", package: "mailgun")
-])
-```
+`Mailgun` is a Vapor 4 service for the popular [email sending API](https://www.mailgun.com/).
 
 ## Usage
 
-### Sign up and set up a Mailgun account [here](https://www.mailgun.com/)
-Make sure you get an API key and register a custom domain
-
-### Configure
-
-In `configure.swift`:
-
-```swift
-import Mailgun
-
-// Called before your application initializes.
-func configure(_ app: Application) throws {
-    /// case 1
-    /// put into your environment variables the following keys:
-    /// MAILGUN_API_KEY=...
-    app.mailgun.configuration = .environment
-
-    /// case 2
-    /// manually
-    app.mailgun.configuration = .init(apiKey: "<api key>")
-}
-```
-
-> Note: If your private api key begins with `key-`, be sure to include it
+Sign up and set up a Mailgun account [here](https://www.mailgun.com/).
+Make sure you get an API key and register a custom domain.
 
 ### Declare all your domains
-
 ```swift
 extension MailgunDomain {
     static var myApp1: MailgunDomain { .init("mg.myapp1.com", .us) }
@@ -61,53 +35,52 @@ extension MailgunDomain {
 }
 ```
 
-Set default domain in `configure.swift`
+### Configure
+
+In `configure.swift`:
 
 ```swift
-app.mailgun.defaultDomain = .myApp1
-```
-
-### Usage
-
-`Mailgun` is available on both `Application` and `Request`
-
-```swift
-// call it without arguments to use default domain
-app.mailgun().send(...)
-req.mailgun().send(...)
-
-// or call it with domain
-app.mailgun(.myApp1).send(...)
-req.mailgun(.myApp1).send(...)
-```
-
-#### In `configure.swift`
-
-```swift
+import Configuration
 import Mailgun
 
-// Called before your application initializes.
-func configure(_ app: Application) throws {
-    /// configure mailgun
+public func configure(_ app: Application) async throws {
+    // Either set it directly
+    app.mailgun.configuration = .init(apiKey: "<api key>", defaultDomain: .myApp1)
 
-    /// then you're ready to use it
-    app.mailgun(.myApp1).send(...).whenSuccess { response in
-        print("just sent: \(response)")
-    }
+    // Or use Swift Configuration to read from environment variables or config files
+    let config = ConfigReader(providers: [
+        EnvironmentVariablesProvider(),
+        try await JSONProvider(filePath: "mailgun.config.json")
+    ])
+    app.mailgun.configuration = try .init(config: config)
 }
+```
+
+> Note: If your private API key begins with `key-`, be sure to include it
+
+### Send emails
+
+The `MailgunClient` is available on both `Application` and `Request`
+
+```swift
+// Call it without arguments to use default domain
+try await app.mailgun.client().send(...)
+try await req.mailgunClient().send(...)
+
+// or call it with domain
+try await app.mailgun.client(.myApp1).send(...)
+try await req.mailgunClient(.myApp1).send(...)
 ```
 
 > 💡 NOTE: All the examples below will be with `Request`, but you could do the same with `Application` as in example above.
 
-#### In `routes.swift`:
-
-##### Without attachments
+#### Without attachments
 
 ```swift
 import Mailgun
 
 func routes(_ app: Application) throws {
-    app.post("mail") { req -> EventLoopFuture<ClientResponse> in
+    app.post("mail") { req async throws -> ClientResponse in
         let message = MailgunMessage(
             from: "postmaster@example.com",
             to: "example@gmail.com",
@@ -115,21 +88,20 @@ func routes(_ app: Application) throws {
             text: "This is a newsletter",
             html: "<h1>This is a newsletter</h1>"
         )
-        return req.mailgun().send(message)
+        return try await req.mailgunClient().send(message)
     }
 }
 ```
 
-##### With attachments
-
+#### With attachments
 ```swift
 import Mailgun
 
 func routes(_ app: Application) throws {
-    app.post("mail") { req -> EventLoopFuture<ClientResponse> in
+    app.post("mail") { req async throws -> ClientResponse in
         let fm = FileManager.default
         guard let attachmentData = fm.contents(atPath: "/tmp/test.pdf") else {
-          throw Abort(.internalServerError)
+            throw Abort(.internalServerError)
         }
         let bytes: [UInt8] = Array(attachmentData)
         var bytesBuffer = ByteBufferAllocator().buffer(capacity: bytes.count)
@@ -143,18 +115,17 @@ func routes(_ app: Application) throws {
             html: "<h1>This is a newsletter</h1>",
             attachments: [attachment]
         )
-        return req.mailgun().send(message)
+        return try await req.mailgunClient().send(message)
     }
 }
 ```
 
-##### With template (attachments can be used in same way)
-
+#### With template (attachments can be used in same way)
 ```swift
 import Mailgun
 
 func routes(_ app: Application) throws {
-    app.post("mail") { req -> EventLoopFuture<ClientResponse> in
+    app.post("mail") { req async throws -> ClientResponse in
         let message = MailgunTemplateMessage(
             from: "postmaster@example.com",
             to: "example@gmail.com",
@@ -162,12 +133,12 @@ func routes(_ app: Application) throws {
             template: "my-template",
             templateData: ["foo": "bar"]
         )
-        return req.mailgun().send(message)
+        return try await req.mailgunClient().send(message)
     }
 }
 ```
 
-##### Setup content through Leaf
+#### Setup content through Leaf
 
 Using Vapor Leaf, you can easily setup your HTML Content.
 
@@ -181,18 +152,16 @@ First setup a leaf file in `Resources/Views/Emails/my-email.leaf`
 </html>
 ```
 
-With this, you can change the `#(name)` with a variable from your Swift code, when sending the mail
+With this, you can change the `#(name)` with a variable from your Swift code; then when sending the email:
 
 ```swift
 import Mailgun
 
 func routes(_ app: Application) throws {
-    app.post("mail") { req -> EventLoopFuture<ClientResponse> in
-        let content = try req.view().render("Emails/my-email", [
-            "name": "Bob"
-        ])
+    app.post("mail") { req async throws -> ClientResponse in
+        let content = try await req.view.render("Emails/my-email", ["name": "Bob"])
 
-        let message = Mailgun.Message(
+        let message = MailgunMessage(
             from: "postmaster@example.com",
             to: "example@gmail.com",
             subject: "Newsletter",
@@ -200,25 +169,21 @@ func routes(_ app: Application) throws {
             html: content
         )
 
-        return req.mailgun().send(message)
+        return try await req.mailgunClient().send(message)
     }
 }
 ```
 
-##### Setup routes
-
+#### Setup routes
 ```swift
-public func configure(_ app: Application) throws {
-    // sets up a catch_all forward for the route listed
+public func configure(_ app: Application) async throws {
+    // sets up a `catch_all` forward for the route listed
     let routeSetup = MailgunRouteSetup(forwardURL: "http://example.com/mailgun/all", description: "A route for all emails")
-    app.mailgun().setup(forwarding: routeSetup).whenSuccess { response in
-        print(response)
-    }
+    try await app.mailgun.client().setup(forwarding: routeSetup)
 }
 ```
 
-##### Handle routes
-
+#### Handle routes
 ```swift
 import Mailgun
 
@@ -236,16 +201,15 @@ func routes(_ app: Application) throws {
 }
 ```
 
-##### Creating templates
-
+#### Creating templates
 ```swift
 import Mailgun
 
 func routes(_ app: Application) throws {
     let mailgunGroup = app.grouped("mailgun")
-    mailgunGroup.post("template") { req -> EventLoopFuture<ClientResponse> in
+    mailgunGroup.post("template") { req async throws -> ClientResponse in
         let template = MailgunTemplate(name: "my-template", description: "api created :)", template: "<h1>Hello {{ name }}</h1>")
-        return req.mailgun().createTemplate(template)
+        return try await req.mailgunClient().createTemplate(template)
     }
 }
 ```
