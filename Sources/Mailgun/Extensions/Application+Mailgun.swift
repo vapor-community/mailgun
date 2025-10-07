@@ -27,9 +27,8 @@ extension Application {
 
                         return MailgunClient(
                             config: config,
-                            eventLoop: app.eventLoopGroup.next(),
-                            client: app.client,
-                            domain: useDomain
+                            domain: useDomain,
+                            client: app.client
                         )
                     }
                 }
@@ -119,9 +118,5 @@ extension Application {
 
     public var mailgun: Mailgun {
         .init(app: self)
-    }
-
-    public func mailgun(_ domain: MailgunDomain? = nil) -> MailgunProvider {
-        self.mailgun.client(domain)
     }
 }

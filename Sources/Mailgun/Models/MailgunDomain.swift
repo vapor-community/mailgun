@@ -7,3 +7,9 @@ public struct MailgunDomain: Sendable {
         self.region = region
     }
 }
+
+/// Describes a region: US or EU
+public enum MailgunRegion: String, Sendable {
+    case us
+    case eu
+}
