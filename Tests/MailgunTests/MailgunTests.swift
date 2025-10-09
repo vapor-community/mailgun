@@ -4,7 +4,7 @@ import SystemPackage
 import Testing
 import VaporTesting
 
-@Suite("Mailgun Tests")
+@Suite("Mailgun Tests", .serialized)
 struct MailgunTests {
     private func configure(_ app: Application) async throws {
         let config = ConfigReader(providers: [
