@@ -1,5 +1,10 @@
-import Foundation
 public import Vapor
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 public struct MailgunRouteSetup: Content {
     public static var defaultContentType: HTTPMediaType { .urlEncodedForm }

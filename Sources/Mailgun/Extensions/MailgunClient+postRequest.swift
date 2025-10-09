@@ -1,5 +1,5 @@
 import AsyncHTTPClient
-public import Vapor
+import Vapor
 
 extension MailgunClient {
     func postRequest<Message: Content>(_ content: Message, endpoint: String) async throws -> ClientResponse {

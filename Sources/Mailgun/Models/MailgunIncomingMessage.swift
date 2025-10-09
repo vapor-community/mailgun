@@ -49,7 +49,7 @@ public struct MailgunIncomingMessage: Content {
         }
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         recipient = try container.decode(String.self, forKey: .recipient)
         sender = try container.decode(String.self, forKey: .sender)

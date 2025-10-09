@@ -1,4 +1,5 @@
-public import Vapor
+import NIOFoundationCompat
+import Vapor
 
 extension MailgunClient {
     func parse(response: ClientResponse) throws -> ClientResponse {
