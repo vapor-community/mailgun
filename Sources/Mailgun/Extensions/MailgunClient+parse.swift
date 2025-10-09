@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 extension MailgunClient {
     func parse(response: ClientResponse) throws -> ClientResponse {

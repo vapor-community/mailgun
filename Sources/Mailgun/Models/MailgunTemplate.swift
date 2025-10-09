@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 /// Template, see https://documentation.mailgun.com/en/latest/api-templates.html#templates
 public struct MailgunTemplate: Content {

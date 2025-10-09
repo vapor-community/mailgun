@@ -1,5 +1,5 @@
 public import Configuration
-import Vapor
+public import Vapor
 
 public struct MailgunConfiguration: Sendable {
     /// API key (including "key-" prefix)
