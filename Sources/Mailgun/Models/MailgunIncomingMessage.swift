@@ -1,4 +1,4 @@
-import Vapor
+public import Vapor
 
 public struct MailgunIncomingMessage: Content {
     public static var defaultContentType: HTTPMediaType { .formData }
@@ -49,7 +49,7 @@ public struct MailgunIncomingMessage: Content {
         }
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         recipient = try container.decode(String.self, forKey: .recipient)
         sender = try container.decode(String.self, forKey: .sender)
@@ -65,7 +65,7 @@ public struct MailgunIncomingMessage: Content {
 
         var _attachments: [File] = []
         let attachmentsContainer = try decoder.container(keyedBy: DynamicAttachmentKey.self)
-        try attachmentsContainer.allKeys.forEach { attachmentKey in
+        for attachmentKey in attachmentsContainer.allKeys {
             _attachments.append(try attachmentsContainer.decode(File.self, forKey: attachmentKey))
         }
         attachments = _attachments

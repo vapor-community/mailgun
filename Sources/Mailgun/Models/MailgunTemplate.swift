@@ -1,8 +1,8 @@
-import Vapor
+public import Vapor
 
 /// Template, see https://documentation.mailgun.com/en/latest/api-templates.html#templates
 public struct MailgunTemplate: Content {
-    public static let defaultContentType: HTTPMediaType { .formData }
+    public static var defaultContentType: HTTPMediaType { .formData }
 
     public let name: String
     public let description: String

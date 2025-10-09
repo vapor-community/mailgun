@@ -1,3 +1,4 @@
+import NIOFoundationCompat
 import Vapor
 
 extension MailgunClient {
