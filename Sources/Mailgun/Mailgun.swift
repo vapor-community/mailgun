@@ -38,8 +38,13 @@ public struct MailgunClient: MailgunProvider {
 // MARK: - Send message
 
 extension MailgunClient {
-    /// Base API URL based on the current region
+    /// Base API URL from the configuration, falling back to the one belonging
+    /// to the current region
     var baseApiUrl: String {
+        if let configured = config.baseApiUrl {
+            return configured
+        }
+
         switch domain.region {
         case .us: return "https://api.mailgun.net/v3"
         case .eu: return "https://api.eu.mailgun.net/v3"

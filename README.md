@@ -67,6 +67,24 @@ Set default domain in `configure.swift`
 app.mailgun.defaultDomain = .myApp1
 ```
 
+### Setting the API base URL
+
+By default requests go to the API URL belonging to the domain's region. Configure `baseApiUrl` to send them somewhere else — an internal egress proxy, a gateway, or a local stub:
+
+```swift
+/// case 1
+/// put into your environment variables the following keys:
+/// MAILGUN_API_KEY=...
+/// MAILGUN_API_BASE_URL=... (optional)
+app.mailgun.configuration = .environment
+
+/// case 2
+/// manually
+app.mailgun.configuration = .init(apiKey: "<api key>", baseApiUrl: "https://mailgun.proxy.internal/v3")
+```
+
+Leave it unset to keep the region-based default.
+
 ### Usage
 
 `Mailgun` is available on both `Application` and `Request`
