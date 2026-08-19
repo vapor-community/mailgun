@@ -1,4 +1,4 @@
-// swift-tools-version:6.1
+// swift-tools-version:6.2
 import PackageDescription
 
 let package = Package(
@@ -10,8 +10,8 @@ let package = Package(
         .library(name: "Mailgun", targets: ["Mailgun"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.117.0"),
-        .package(url: "https://github.com/apple/swift-configuration.git", from: "0.1.1"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.120.0"),
+        .package(url: "https://github.com/apple/swift-configuration.git", from: "1.0.2", traits: []),
     ],
     targets: [
         .target(

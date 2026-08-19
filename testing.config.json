@@ -1,7 +1,0 @@
-{
-    "apiKey": "wrong-test-api-key",
-    "defaultDomain": {
-        "domain": "mg.myapp1.com",
-        "region": "us"
-    }
-}
